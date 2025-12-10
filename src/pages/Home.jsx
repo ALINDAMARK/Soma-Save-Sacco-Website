@@ -168,14 +168,14 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row sm:overflow-x-auto gap-6 sm:gap-8 sm:pb-4 [-ms-scrollbar-style:none] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-thumb]:bg-primary [&::-webkit-scrollbar-thumb]:rounded-full">
             {[
               { 
-                name: 'Sarah K.', 
-                text: '"SomaSave helped me start my small business with a loan that had fair rates. I\'m so grateful for their support."',
-                image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuArseaAnYHpdBe2K3C-u0pms9a_9SLOBGPKdI3rwDdv5yaXfn9eA7CHvGecrq0mAXAZbvgDWibOLLMOKSX4_j_AL1uBFN2jwN07KDogusjYITpMv2i7UMTM6OllIDEHUyL8KShczE0eAFALhwkn3Nuqkfu8btpu5WvKSVamonRNScL5WS66BANQBq1ePWFWFnm8aioJUbqo2ML09w4q5HEerf780w20ii1h-78J398ZWYwrnn8GpAjgh9CqfBxqb9gxAkpL2E2Vkoyp'
+                name: 'Bakashaba Mark', 
+                text: '"The mobile money payment feature is so convenient! Managing my savings has never been easier."',
+                image: 'Bakashaba Mark.jpg'
               },
               { 
-                name: 'David M.', 
-                text: '"The mobile money payment feature is so convenient! Managing my savings has never been easier."',
-                image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDHE3hJ5qbK5WuT-0DSeog2TBP4D0I0t019f_pMJT4WV2IF9cBl9CeNyRPH2yy763wskDGHH706xs8RBWccti36iyPZFxAoirRoAUX-55VKKuCSQiiDAnGQHGTfdzn_fMO6ymRunCpzYVH47T7GH3o5EriSNw1i9c7WA1DWWSkxlUHAKNSssJsr2e9PvDpE_0DsJlIwKh2VkjPoQAx1rNlDQC1oikpn1Dm5Z6Jbhl5Fa3IZt3tmhRGesxC2EqLmeaNQeieKxhi-FmoR'
+                name: 'Alinda M.', 
+                text: '"Joining this SACCO was the best decision I made for my finances. The community support is amazing!"',
+                image: 'Alinda Mark.jpg'
               },
               { 
                 name: 'Grace A.', 
