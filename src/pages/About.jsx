@@ -179,6 +179,12 @@ export default function About() {
                   role: 'Treasurer',
                   desc: 'Overseeing the financial health of our SACCO to safeguard our members\' investments.',
                   image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCjSq94bVvbAoGM_Szl_rOtsHWd84c59i2A5eLZSHR0ip40Ysa_U-nGsVS0i7mRFbJTc7rPviBLqMq9jxYf7MMdsZpi7_RutcSX_TplMzhT-SQfTokoLUzXDqR04JoWEndyd988z5qANLfpwTNXyXQhyEj2tuBu11-YjgRhvigRlbmkbBF4c2BEo675sUQ6o0vLBplsLLGB10m9_E1YSA5C7Sw2eHIflZHfZX9KIIB7BeMdQkeZBi2WvFLLoj_QORsXjZLwiUNUg-hw'
+                },
+                {
+                  name: 'Aloisius Kasozi',
+                  role: 'Tech Lead',
+                  desc: 'Driving our digital transformation to provide seamless and secure access to our services.',
+                  image: 'aloisius.png'
                 }
               ].map((member, index) => (
                 <div 
