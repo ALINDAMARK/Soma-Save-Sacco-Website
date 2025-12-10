@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link rel="icon" type="image/png" href="icon-180x180.png"/>
+<title>SomaSave SACCO Services Page</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#11d462",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#102218",
+                        "text-light": "#111814",
+                        "text-dark": "#f6f8f7",
+                        "subtext-light": "#618972",
+                        "subtext-dark": "#a0b5ab",
+                        "border-light": "#dbe6e0",
+                        "border-dark": "#3a4c42",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05)',
+                        'soft-lg': '0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+                'FILL' 0,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 24;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+<div class="relative flex min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- TopNavBar -->
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
+<div class="px-4 lg:px-10 py-3 flex items-center justify-between whitespace-nowrap border-b border-solid border-border-light dark:border-border-dark max-w-7xl mx-auto">
+<div class="flex items-center gap-3 text-text-light dark:text-text-dark">
+<div>
+<img src="icon-180x180.png" alt="SomaSave SACCO Logo" class="w-10 h-10 object-contain"/>
+</div>
+<h2 class="text-lg font-bold tracking-[-0.015em]">SomaSave SACCO</h2>
+</div>
+<div class="hidden md:flex flex-1 justify-center items-center gap-9">
+<a class="text-sm font-medium hover:text-primary dark:hover:text-primary" href="home.html">Home</a>
+<a class="text-sm font-medium hover:text-primary dark:hover:text-primary" href="about.html">About Us</a>
+<a class="text-sm font-medium text-primary dark:text-primary font-bold" href="services.html">Services</a>
+<a class="text-sm font-medium hover:text-primary dark:hover:text-primary" href="contact.html">Contact</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-5 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
+<span class="truncate">Become a Member</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 px-4 lg:px-10 py-5">
+<div class="layout-content-container flex flex-col max-w-7xl mx-auto">
+<!-- HeroSection -->
+<section class="w-full py-12 md:py-20">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+<div class="flex flex-col gap-6 text-center md:text-left">
+<h1 class="text-4xl md:text-5xl font-black leading-tight tracking-[-0.033em]">Financial Services for Our Community</h1>
+<p class="text-base md:text-lg text-subtext-light dark:text-subtext-dark">Discover our range of savings, loans, and payment services designed to empower you and our community.</p>
+<div class="flex justify-center md:justify-start">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-primary text-white text-base font-bold tracking-[0.015em] hover:opacity-90 transition-opacity">
+<span class="truncate">Get Started Today</span>
+</button>
+</div>
+</div>
+<div class="w-full bg-center bg-no-repeat aspect-video md:aspect-square bg-cover rounded-xl" data-alt="A group of smiling Ugandan entrepreneurs collaborating in a bright, modern workspace." style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG--7DZ1FowIktnwA9zmHY6eFUMhP8UhDRwTop-gY-_I0u-85Kikx_aau7CrHQd4Md7tjwNtQcoPCo5dwSiIzZjMQMrCmhhsHG8XiwK6_ezZdxXGQcZN5F9-94Y9Pmz6cXse-BfPShzet0Gyw2rywG61TntAVO1ycwCQpKEVW80Pa4k0BtU6innAzbm2OpLNweSs0nymjtVvZzTl_8RM-wMHlsAfBie0VpeCElpKUJbvjNvk1gTvX3QrA2HubOKOZ24h99EcClZQfk");'></div>
+</div>
+</section>
+<!-- Savings Accounts Section -->
+<section class="py-12 md:py-16">
+<h2 class="text-2xl md:text-3xl font-bold leading-tight tracking-[-0.015em] mb-8 text-center">Savings Accounts</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="flex flex-col gap-4 rounded-xl border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark p-6 shadow-soft hover:shadow-soft-lg transition-shadow">
+<div class="text-primary"><span class="material-symbols-outlined">savings</span></div>
+<h3 class="text-lg font-bold">Regular Savings</h3>
+<p class="text-sm text-subtext-light dark:text-subtext-dark">Flexible savings for your daily needs with easy access to your funds.</p>
+<a class="mt-auto text-sm font-bold text-primary hover:underline" href="#">Learn More →</a>
+</div>
+<div class="flex flex-col gap-4 rounded-xl border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark p-6 shadow-soft hover:shadow-soft-lg transition-shadow">
+<div class="text-primary"><span class="material-symbols-outlined">event_available</span></div>
+<h3 class="text-lg font-bold">Fixed Deposit Savings</h3>
+<p class="text-sm text-subtext-light dark:text-subtext-dark">Earn higher interest rates by saving your money for a fixed period.</p>
+<a class="mt-auto text-sm font-bold text-primary hover:underline" href="#">Learn More →</a>
+</div>
+<div class="flex flex-col gap-4 rounded-xl border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark p-6 shadow-soft hover:shadow-soft-lg transition-shadow">
+<div class="text-primary"><span class="material-symbols-outlined">groups</span></div>
+<h3 class="text-lg font-bold">Group Savings</h3>
+<p class="text-sm text-subtext-light dark:text-subtext-dark">Pool funds together with your community for collective goals and projects.</p>
+<a class="mt-auto text-sm font-bold text-primary hover:underline" href="#">Learn More →</a>
+</div>
+</div>
+</section>
+<!-- Loan Products Section -->
+<section class="py-12 md:py-16">
+<h2 class="text-2xl md:text-3xl font-bold leading-tight tracking-[-0.015em] mb-8 text-center">Loan Products</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="flex flex-col gap-4 rounded-xl border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark p-6 shadow-soft hover:shadow-soft-lg transition-shadow">
+<div class="text-primary"><span class="material-symbols-outlined">school</span></div>
+<h3 class="text-lg font-bold">School Fees Loan</h3>
+<p class="text-sm text-subtext-light dark:text-subtext-dark">Ensure your child's education is never interrupted.</p>
+<a class="mt-auto text-sm font-bold text-primary hover:underline" href="#">Learn More →</a>
+</div>
+<div class="flex flex-col gap-4 rounded-xl border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark p-6 shadow-soft hover:shadow-soft-lg transition-shadow">
+<div class="text-primary"><span class="material-symbols-outlined">store</span></div>
+<h3 class="text-lg font-bold">Business Loan</h3>
+<p class="text-sm text-subtext-light dark:text-subtext-dark">Capital to start, run, or expand your business venture.</p>
+<a class="mt-auto text-sm font-bold text-primary hover:underline" href="#">Learn More →</a>
+</div>
+<div class="flex flex-col gap-4 rounded-xl border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark p-6 shadow-soft hover:shadow-soft-lg transition-shadow">
+<div class="text-primary"><span class="material-symbols-outlined">emergency</span></div>
+<h3 class="text-lg font-bold">Emergency Loan</h3>
+<p class="text-sm text-subtext-light dark:text-subtext-dark">Quick access to funds for unforeseen circumstances.</p>
+<a class="mt-auto text-sm font-bold text-primary hover:underline" href="#">Learn More →</a>
+</div>
+<div class="flex flex-col gap-4 rounded-xl border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark p-6 shadow-soft hover:shadow-soft-lg transition-shadow">
+<div class="text-primary"><span class="material-symbols-outlined">trending_up</span></div>
+<h3 class="text-lg font-bold">Development Loan</h3>
+<p class="text-sm text-subtext-light dark:text-subtext-dark">Finance your long-term projects like construction or agriculture.</p>
+<a class="mt-auto text-sm font-bold text-primary hover:underline" href="#">Learn More →</a>
+</div>
+</div>
+</section>
+<!-- Other Services Section -->
+<section class="py-12 md:py-16">
+<h2 class="text-2xl md:text-3xl font-bold leading-tight tracking-[-0.015em] mb-8 text-center">More Services</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+<!-- Mobile Money Payments Section -->
+<div class="flex flex-col gap-4 rounded-xl border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark p-6 shadow-soft hover:shadow-soft-lg transition-shadow">
+<div class="text-primary"><span class="material-symbols-outlined">payments</span></div>
+<h3 class="text-lg font-bold">Mobile Money Payments</h3>
+<p class="text-sm text-subtext-light dark:text-subtext-dark">Conveniently make deposits and loan repayments using MTN MoMo &amp; Airtel Money.</p>
+<a class="mt-auto text-sm font-bold text-primary hover:underline" href="#">Learn More →</a>
+</div>
+<!-- Membership Services Section -->
+<div class="flex flex-col gap-4 rounded-xl border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark p-6 shadow-soft hover:shadow-soft-lg transition-shadow">
+<div class="text-primary"><span class="material-symbols-outlined">how_to_reg</span></div>
+<h3 class="text-lg font-bold">Membership Services</h3>
+<p class="text-sm text-subtext-light dark:text-subtext-dark">Register as a new member and access your digital statements online, anytime.</p>
+<a class="mt-auto text-sm font-bold text-primary hover:underline" href="#">Learn More →</a>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-gray-100 dark:bg-gray-900 border-t border-border-light dark:border-border-dark">
+<div class="max-w-7xl mx-auto px-4 lg:px-10 py-12">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+<div class="col-span-1 md:col-span-2">
+<div class="flex items-center gap-3 text-text-light dark:text-text-dark mb-4">
+<div>
+<img src="icon-180x180.png" alt="SomaSave SACCO Logo" class="w-10 h-10 object-contain"/>
+</div>
+<h2 class="text-lg font-bold tracking-[-0.015em]">SomaSave SACCO</h2>
+</div>
+<p class="text-sm text-subtext-light dark:text-subtext-dark">Your trusted partner in community-focused financial empowerment.</p>
+</div>
+<div>
+<h3 class="font-bold mb-4">Quick Links</h3>
+<ul class="space-y-2 text-sm">
+<li><a class="text-subtext-light dark:text-subtext-dark hover:text-primary" href="home.html">Home</a></li>
+<li><a class="text-subtext-light dark:text-subtext-dark hover:text-primary" href="about.html">About Us</a></li>
+<li><a class="text-subtext-light dark:text-subtext-dark hover:text-primary" href="services.html">Services</a></li>
+<li><a class="text-subtext-light dark:text-subtext-dark hover:text-primary" href="contact.html">Contact Us</a></li>
+<li><a class="text-subtext-light dark:text-subtext-dark hover:text-primary" href="#">FAQs</a></li>
+</ul>
+</div>
+<div>
+<h3 class="font-bold mb-4">Contact</h3>
+<ul class="space-y-2 text-sm text-subtext-light dark:text-subtext-dark">
+<li>123 Finance Street, Kampala, Uganda</li>
+<li>info@somasave.ug</li>
+<li>+256 123 456 789</li>
+</ul>
+</div>
+</div>
+<div class="mt-8 pt-8 border-t border-border-light dark:border-border-dark text-center text-sm text-subtext-light dark:text-subtext-dark">
+<p>© 2024 SomaSave SACCO. All rights reserved. Regulated by the Uganda Microfinance Regulatory Authority.</p>
+</div>
+</div>
+</footer>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link rel="icon" type="image/png" href="icon-180x180.png"/>
+<title>SomaSave SACCO Loan Application</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#11d462",
+              "background-light": "#f6f8f7",
+              "background-dark": "#102218",
+            },
+            fontFamily: {
+              "display": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+      }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex min-h-screen w-full flex-col group/design-root">
+<!-- TopNavBar -->
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
+<div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between whitespace-nowrap border-b border-gray-200 dark:border-gray-700 h-20">
+<div class="flex items-center gap-4 text-[#111814] dark:text-white">
+<div>
+<img src="icon-180x180.png" alt="SomaSave SACCO Logo" class="w-10 h-10 object-contain"/>
+</div>
+<h2 class="text-[#111814] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em]">SomaSave SACCO</h2>
+</div>
+<nav class="hidden md:flex flex-1 justify-center gap-8">
+<a class="text-[#111814] dark:text-gray-300 hover:text-primary dark:hover:text-primary text-sm font-medium leading-normal" href="home.html">Home</a>
+<a class="text-[#111814] dark:text-gray-300 hover:text-primary dark:hover:text-primary text-sm font-medium leading-normal" href="about.html">About Us</a>
+<a class="text-primary text-sm font-bold leading-normal" href="loan_application.html">Loans</a>
+<a class="text-[#111814] dark:text-gray-300 hover:text-primary dark:hover:text-primary text-sm font-medium leading-normal" href="services.html">Services</a>
+<a class="text-[#111814] dark:text-gray-300 hover:text-primary dark:hover:text-primary text-sm font-medium leading-normal" href="contact.html">Contact</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-primary text-[#111814] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+<span class="truncate">Login</span>
+</button>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+<!-- Form Section -->
+<div class="lg:col-span-2 space-y-8">
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between gap-3">
+<div class="flex flex-col gap-2">
+<p class="text-[#111814] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Loan Application</p>
+<p class="text-[#618972] dark:text-gray-400 text-base font-normal leading-normal">Please fill out the form below to get started. It only takes a few minutes.</p>
+</div>
+</div>
+<!-- ProgressBar -->
+<div class="flex flex-col gap-3">
+<div class="flex gap-6 justify-between">
+<p class="text-[#111814] dark:text-gray-300 text-base font-medium leading-normal">Step 1 of 5</p>
+</div>
+<div class="rounded-full bg-gray-200 dark:bg-gray-700 h-2">
+<div class="h-2 rounded-full bg-primary" style="width: 20%;"></div>
+</div>
+</div>
+<form class="space-y-10">
+<!-- Section 1: Personal Information -->
+<div class="space-y-6">
+<h2 class="text-[#111814] dark:text-white text-[22px] font-bold leading-tight tracking-[-0.015em] border-b border-gray-200 dark:border-gray-700 pb-3">1. Personal Information</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<label class="flex flex-col">
+<p class="text-[#111814] dark:text-gray-300 text-base font-medium leading-normal pb-2">First Name</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111814] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark h-14 placeholder:text-[#618972] dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal" placeholder="Enter your first name" value=""/>
+</label>
+<label class="flex flex-col">
+<p class="text-[#111814] dark:text-gray-300 text-base font-medium leading-normal pb-2">Last Name</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111814] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark h-14 placeholder:text-[#618972] dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal" placeholder="Enter your last name" value=""/>
+</label>
+<label class="flex flex-col md:col-span-2">
+<p class="text-[#111814] dark:text-gray-300 text-base font-medium leading-normal pb-2">Email Address</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111814] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark h-14 placeholder:text-[#618972] dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal" placeholder="you@example.com" type="email" value=""/>
+</label>
+<label class="flex flex-col">
+<p class="text-[#111814] dark:text-gray-300 text-base font-medium leading-normal pb-2">Phone Number</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111814] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark h-14 placeholder:text-[#618972] dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal" placeholder="+256 700 123456" value=""/>
+</label>
+<label class="flex flex-col">
+<p class="text-[#111814] dark:text-gray-300 text-base font-medium leading-normal pb-2">Date of Birth</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111814] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark h-14 placeholder:text-[#618972] dark:placeholder:text-gray-500 p-[15px] text-base font-normal leading-normal" type="date" value=""/>
+</label>
+</div>
+</div>
+<!-- Navigation Buttons -->
+<div class="flex justify-end gap-4 pt-6">
+<button class="flex min-w-[120px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-6 bg-gray-200 dark:bg-gray-700 text-[#111814] dark:text-white text-base font-bold leading-normal hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors" type="button">
+<span class="truncate">Previous Step</span>
+</button>
+<button class="flex min-w-[120px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-6 bg-primary text-[#111814] text-base font-bold leading-normal hover:bg-primary/90 transition-colors" type="button">
+<span class="truncate">Next Step</span>
+</button>
+</div>
+</form>
+</div>
+<!-- Information Side Card -->
+<aside class="lg:col-span-1">
+<div class="sticky top-28 bg-white dark:bg-background-dark p-6 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+<div class="flex flex-col gap-6">
+<h3 class="text-[#111814] dark:text-white text-lg font-bold leading-tight">Loan Requirements</h3>
+<ul class="space-y-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+<div class="flex flex-col">
+<p class="text-[#111814] dark:text-gray-300 font-medium">National ID</p>
+<p class="text-[#618972] dark:text-gray-400 text-sm">A clear, valid copy is required.</p>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+<div class="flex flex-col">
+<p class="text-[#111814] dark:text-gray-300 font-medium">Proof of Income</p>
+<p class="text-[#618972] dark:text-gray-400 text-sm">Recent payslips or bank statements.</p>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+<div class="flex flex-col">
+<p class="text-[#111814] dark:text-gray-300 font-medium">Employment Letter</p>
+<p class="text-[#618972] dark:text-gray-400 text-sm">A letter from your current employer.</p>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+<div class="flex flex-col">
+<p class="text-[#111814] dark:text-gray-300 font-medium">SACCO Membership</p>
+<p class="text-[#618972] dark:text-gray-400 text-sm">Must be an active member for 6+ months.</p>
+</div>
+</li>
+</ul>
+<div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+<h3 class="text-[#111814] dark:text-white text-lg font-bold leading-tight mb-2">Need Help?</h3>
+<p class="text-[#618972] dark:text-gray-400 text-sm mb-4">If you have any questions, feel free to contact our support team.</p>
+<a class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl h-11 px-6 bg-primary/20 text-primary text-sm font-bold leading-normal hover:bg-primary/30 transition-colors" href="#">
+<span class="truncate">Contact Support</span>
+</a>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+</div>
+</body></html>
