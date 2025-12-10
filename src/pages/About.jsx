@@ -163,19 +163,19 @@ export default function About() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {[
                 {
-                  name: 'Jane Doe',
+                  name: 'Mathew Mwesigwa',
                   role: 'Chairperson',
                   desc: 'Leading our SACCO with a vision for community empowerment and sustainable growth.',
                   image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAxu1upNuRcQ15NGZiSB7gfZfE0JSHXZNkc_1eAdSahLwbifwrzPfosICb5anmx8odcs602Nw_A5WM7C92fJWYYD1g7nXNm9lvOEMhCMwoqLhgcPKshBczcliVaDFl_I5Zf1kEPDymsLlOgXI_pBJlNQ01xKlow9IVU3jTK9EqdwKydDFbfHLDxSkSBEsTjhDRC2EJz9L4lf5Idshv_LNnpBm-d2A7jfVepqMurD-wllJhmn_IWANxqjnx2xsiZjkv_VC9A7iZ84RlM'
                 },
                 {
-                  name: 'John Smith',
+                  name: 'Alinda Mark',
                   role: 'Vice-Chairperson',
                   desc: 'Dedicated to fostering financial literacy and ensuring transparent operations.',
                   image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBk8IJ3R9f0Duf7OcoNAwG7mlXiPQgphfGFXIxTw_2Pib5GhdAcSJbHDSXDMil0n6-ahKRqmStr5rUZF8Q9UX1eKKG5rAH41U7_KJtsUGCwpHlY-HVSE571dFdBxlHprHSnwm_SCVmFJY0NWSMA8VsNj5G87p-Ca58WgoglhFZcX7xoMX_wjMTtbDcxg3iiQ8IkcvicX4CqpnpCl-KEd_qDNNLKDRtUkO7GMG23pO3XPVfDyBtKidf0KvwAwTazpPnpN49zAVy68jCx'
                 },
                 {
-                  name: 'Mary Johnson',
+                  name: 'Nabasumba Melissa',
                   role: 'Treasurer',
                   desc: 'Overseeing the financial health of our SACCO to safeguard our members\' investments.',
                   image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCjSq94bVvbAoGM_Szl_rOtsHWd84c59i2A5eLZSHR0ip40Ysa_U-nGsVS0i7mRFbJTc7rPviBLqMq9jxYf7MMdsZpi7_RutcSX_TplMzhT-SQfTokoLUzXDqR04JoWEndyd988z5qANLfpwTNXyXQhyEj2tuBu11-YjgRhvigRlbmkbBF4c2BEo675sUQ6o0vLBplsLLGB10m9_E1YSA5C7Sw2eHIflZHfZX9KIIB7BeMdQkeZBi2WvFLLoj_QORsXjZLwiUNUg-hw'
