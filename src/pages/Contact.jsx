@@ -30,7 +30,7 @@ export default function Contact() {
             Get in Touch
           </h1>
           <p className="mt-3 max-w-2xl text-gray-600 dark:text-gray-400 text-base sm:text-lg font-normal leading-normal">
-            We're here to help. Reach out to us with any questions or inquiries, and we'll get back to you as soon as possible.
+            We're here to help university students. Reach out with any questions about savings, loans, or membership.
           </p>
         </div>
 
@@ -48,7 +48,7 @@ export default function Contact() {
                 <div className="flex flex-col justify-center">
                   <p className="text-gray-900 dark:text-white text-base font-medium leading-normal">Our Office</p>
                   <p className="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
-                    Plot 123, Kampala Road, Kampala, Uganda
+                    Serving all universities across Uganda - Virtual & Mobile Services
                   </p>
                 </div>
               </div>

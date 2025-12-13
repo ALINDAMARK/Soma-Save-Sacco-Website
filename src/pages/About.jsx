@@ -40,10 +40,10 @@ export default function About() {
               >
                 <div className="flex flex-col gap-2 text-left max-w-2xl animate-fadeInUp">
                   <h1 className="text-white text-4xl font-black leading-tight tracking-[-0.033em] md:text-5xl">
-                    Building a Stronger Community, Together.
+                    Building a Stronger Student Community, Together.
                   </h1>
                   <h2 className="text-white/90 text-sm font-normal leading-normal md:text-base">
-                    Learn more about SomaSave SACCO and our commitment to empowering our members through community-focused financial services.
+                    Learn more about SomaSave SACCO and our commitment to empowering university students across Uganda through student-focused financial services.
                   </h2>
                 </div>
               </div>
@@ -57,7 +57,7 @@ export default function About() {
                 Our Mission & Core Values
               </h2>
               <p className="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal max-w-3xl mx-auto">
-                SomaSave SACCO was founded to provide accessible and trustworthy financial services to our community. Our mission is to foster economic growth and stability for our members through savings, credit, and collective investment.
+                SomaSave SACCO was founded to provide accessible and trustworthy financial services to university students across Uganda. Our mission is to foster financial literacy and economic stability for students through savings, credit, and collective investment.
               </p>
             </div>
 
@@ -75,13 +75,13 @@ export default function About() {
                 },
                 {
                   icon: 'groups',
-                  title: 'Community Growth',
-                  desc: 'We are dedicated to reinvesting in our community and supporting local development.'
+                  title: 'Student Community',
+                  desc: 'We are dedicated to building a supportive network of students across all Ugandan universities.'
                 },
                 {
                   icon: 'trending_up',
-                  title: 'Financial Discipline',
-                  desc: 'We promote responsible financial habits to help our members achieve their goals.'
+                  title: 'Financial Literacy',
+                  desc: 'We promote responsible financial habits to help students achieve their academic and personal goals.'
                 }
               ].map((value, index) => (
                 <div 
@@ -111,17 +111,17 @@ export default function About() {
                 Our Journey So Far
               </h2>
               <p className="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal max-w-2xl mx-auto">
-                Key milestones in our history of serving the community.
+                Key milestones in our history of serving university students across Uganda.
               </p>
             </div>
 
             <div className="max-w-2xl mx-auto">
               <div className="grid grid-cols-[40px_1fr] gap-x-4">
                 {[
-                  { icon: 'flag', title: 'Founded in 2025', date: 'May 2025', hasLineTop: false, hasLineBottom: true },
-                  { icon: 'real_estate_agent', title: 'First Community Project', date: 'August 2025', hasLineTop: true, hasLineBottom: true },
-                  { icon: 'person_add', title: 'Reached 40 Members', date: 'September 2025', hasLineTop: true, hasLineBottom: true },
-                  { icon: 'smartphone', title: 'Launched Mobile App', date: 'October 2025', hasLineTop: true, hasLineBottom: false }
+                  { icon: 'flag', title: 'Founded for Students', date: 'May 2025', hasLineTop: false, hasLineBottom: true },
+                  { icon: 'school', title: 'First University Partnership', date: 'August 2025', hasLineTop: true, hasLineBottom: true },
+                  { icon: 'person_add', title: 'Reached 40 Student Members', date: 'September 2025', hasLineTop: true, hasLineBottom: true },
+                  { icon: 'smartphone', title: 'Launched Student Mobile App', date: 'October 2025', hasLineTop: true, hasLineBottom: false }
                 ].map((milestone, index) => (
                   <div key={index} className="contents">
                     <div className="flex flex-col items-center gap-1 pt-3">
@@ -156,7 +156,7 @@ export default function About() {
                 Meet Our Leadership
               </h2>
               <p className="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal max-w-2xl mx-auto">
-                The dedicated team guiding our mission and serving our members.
+                The dedicated student leaders guiding our mission and serving fellow university students.
               </p>
             </div>
 
@@ -165,25 +165,25 @@ export default function About() {
                 {
                   name: 'Mathew Mwesigwa',
                   role: 'Chairperson',
-                  desc: 'Leading our SACCO with a vision for community empowerment and sustainable growth.',
+                  desc: 'Leading our SACCO with a vision for student financial empowerment across Ugandan universities.',
                   image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAxu1upNuRcQ15NGZiSB7gfZfE0JSHXZNkc_1eAdSahLwbifwrzPfosICb5anmx8odcs602Nw_A5WM7C92fJWYYD1g7nXNm9lvOEMhCMwoqLhgcPKshBczcliVaDFl_I5Zf1kEPDymsLlOgXI_pBJlNQ01xKlow9IVU3jTK9EqdwKydDFbfHLDxSkSBEsTjhDRC2EJz9L4lf5Idshv_LNnpBm-d2A7jfVepqMurD-wllJhmn_IWANxqjnx2xsiZjkv_VC9A7iZ84RlM'
                 },
                 {
                   name: 'Alinda Mark',
                   role: 'Vice-Chairperson',
-                  desc: 'Dedicated to fostering financial literacy and ensuring transparent operations.',
+                  desc: 'Dedicated to fostering financial literacy among university students and ensuring transparent operations.',
                   image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBk8IJ3R9f0Duf7OcoNAwG7mlXiPQgphfGFXIxTw_2Pib5GhdAcSJbHDSXDMil0n6-ahKRqmStr5rUZF8Q9UX1eKKG5rAH41U7_KJtsUGCwpHlY-HVSE571dFdBxlHprHSnwm_SCVmFJY0NWSMA8VsNj5G87p-Ca58WgoglhFZcX7xoMX_wjMTtbDcxg3iiQ8IkcvicX4CqpnpCl-KEd_qDNNLKDRtUkO7GMG23pO3XPVfDyBtKidf0KvwAwTazpPnpN49zAVy68jCx'
                 },
                 {
                   name: 'Nabasumba Melissa',
                   role: 'Treasurer',
-                  desc: 'Overseeing the financial health of our SACCO to safeguard our members\' investments.',
+                  desc: 'Overseeing the financial health of our SACCO to safeguard student members\' investments.',
                   image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCjSq94bVvbAoGM_Szl_rOtsHWd84c59i2A5eLZSHR0ip40Ysa_U-nGsVS0i7mRFbJTc7rPviBLqMq9jxYf7MMdsZpi7_RutcSX_TplMzhT-SQfTokoLUzXDqR04JoWEndyd988z5qANLfpwTNXyXQhyEj2tuBu11-YjgRhvigRlbmkbBF4c2BEo675sUQ6o0vLBplsLLGB10m9_E1YSA5C7Sw2eHIflZHfZX9KIIB7BeMdQkeZBi2WvFLLoj_QORsXjZLwiUNUg-hw'
                 },
                 {
                   name: 'Aloisius Kasozi',
                   role: 'Tech Lead',
-                  desc: 'Driving our digital transformation to provide seamless and secure access to our services.',
+                  desc: 'Driving digital innovation to provide seamless mobile access for students on campus.',
                   image: 'aloisius.png'
                 }
               ].map((member, index) => (
@@ -206,10 +206,10 @@ export default function About() {
           {/* CTA Section */}
           <div className="my-16 bg-primary-soft/30 dark:bg-primary-soft/10 rounded-xl p-10 text-center">
             <h2 className="text-gray-900 dark:text-white text-3xl font-bold mb-2">
-              Ready to Grow With Us?
+              Ready to Join the Student Movement?
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-lg mx-auto">
-              Join a community dedicated to mutual growth and financial well-being. Become a member of SomaSave SACCO today.
+              Join university students across Uganda building financial independence. Become a member of SomaSave SACCO today.
             </p>
             <button className="flex mx-auto min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
               <span className="truncate">Join SomaSave Today</span>

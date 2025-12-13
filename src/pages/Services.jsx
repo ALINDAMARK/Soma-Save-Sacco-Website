@@ -33,10 +33,10 @@ export default function Services() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
             <div className="flex flex-col gap-6 text-center md:text-left">
               <h1 className="text-4xl md:text-5xl font-black leading-tight tracking-[-0.033em] text-gray-900 dark:text-white">
-                Financial Services for Our Community
+                Financial Services for University Students
               </h1>
               <p className="text-base md:text-lg text-gray-600 dark:text-gray-400">
-                Discover our range of savings, loans, and payment services designed to empower you and our community.
+                Discover our range of student-focused savings, loans, and payment services designed to support your university journey.
               </p>
               <div className="flex justify-center md:justify-start">
                 <button className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-primary text-white text-base font-bold tracking-[0.015em] hover:opacity-90 transition-opacity">
@@ -62,18 +62,18 @@ export default function Services() {
             {[
               {
                 icon: 'savings',
-                title: 'Regular Savings',
-                desc: 'Flexible savings for your daily needs with easy access to your funds.'
+                title: 'Student Savings Account',
+                desc: 'Flexible savings for students with easy access to your funds anytime on campus.'
               },
               {
                 icon: 'event_available',
-                title: 'Fixed Deposit Savings',
-                desc: 'Earn higher interest rates by saving your money for a fixed period.'
+                title: 'Goal-Based Savings',
+                desc: 'Save for tuition, projects, or graduation with dedicated savings plans.'
               },
               {
                 icon: 'groups',
-                title: 'Group Savings',
-                desc: 'Pool funds together with your community for collective goals and projects.'
+                title: 'Group Student Savings',
+                desc: 'Pool funds with classmates for events, projects, or collective goals.'
               }
             ].map((account, index) => (
               <div 
@@ -102,23 +102,23 @@ export default function Services() {
             {[
               {
                 icon: 'school',
-                title: 'School Fees Loan',
-                desc: "Ensure your child's education is never interrupted."
+                title: 'Tuition Support Loan',
+                desc: 'Ensure your education is never interrupted due to tuition challenges.'
               },
               {
                 icon: 'store',
-                title: 'Business Loan',
-                desc: 'Capital to start, run, or expand your business venture.'
+                title: 'Student Business Loan',
+                desc: 'Capital to start or expand your student business venture on campus.'
               },
               {
                 icon: 'emergency',
-                title: 'Emergency Loan',
-                desc: 'Quick access to funds for unforeseen circumstances.'
+                title: 'Emergency Student Loan',
+                desc: 'Quick access to funds for urgent student needs and emergencies.'
               },
               {
                 icon: 'trending_up',
-                title: 'Development Loan',
-                desc: 'Finance your long-term projects like construction or agriculture.'
+                title: 'Project Finance Loan',
+                desc: 'Finance your academic projects, research, or educational needs.'
               }
             ].map((loan, index) => (
               <div 
@@ -147,13 +147,13 @@ export default function Services() {
             {[
               {
                 icon: 'payments',
-                title: 'Mobile Money Payments',
-                desc: 'Conveniently make deposits and loan repayments using MTN MoMo & Airtel Money.'
+                title: 'Mobile Money for Students',
+                desc: 'Make deposits and repayments easily using MTN MoMo & Airtel Money from campus.'
               },
               {
                 icon: 'how_to_reg',
-                title: 'Membership Services',
-                desc: 'Register as a new member and access your digital statements online, anytime.'
+                title: 'Student Membership',
+                desc: 'Register with your student ID and access your account online from any university.'
               }
             ].map((service, index) => (
               <div 

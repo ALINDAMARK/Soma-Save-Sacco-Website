@@ -34,10 +34,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center">
             <h1 className="text-4xl font-black leading-tight tracking-tighter text-gray-900 dark:text-white sm:text-5xl md:text-6xl animate-fadeInUp">
-              Empowering Members Through <span className="text-primary">Savings</span>, <span className="text-primary">Loans</span> & <span className="text-primary">Financial Growth</span>
+              Empowering <span className="text-primary">University Students</span> Through <span className="text-primary">Savings</span>, <span className="text-primary">Loans</span> & <span className="text-primary">Financial Growth</span>
             </h1>
             <p className="mt-6 max-w-2xl mx-auto text-lg leading-normal text-gray-600 dark:text-gray-400 animate-fadeInUp stagger-1">
-              Join our community-focused SACCO and take control of your financial future. We are dedicated to supporting the well-being of our members in Uganda.
+              Join Uganda's premier student-focused SACCO and take control of your financial future. Supporting university students across all Ugandan universities.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row flex-wrap gap-4 items-center justify-center animate-fadeInUp stagger-2">
               <button className="w-full sm:w-auto flex min-w-[200px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full h-14 px-8 bg-primary text-gray-900 text-base font-bold leading-normal tracking-[0.015em] hover:opacity-90 hover-glow transform hover:scale-105 transition-all shadow-lg hover:shadow-xl">
@@ -61,15 +61,15 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center transform hover:scale-110 transition-transform duration-300 cursor-pointer">
               <div className="text-4xl md:text-5xl font-black mb-2 animate-fadeInUp text-primary">40+</div>
-              <div className="text-sm md:text-base font-semibold opacity-90">Active Members</div>
+              <div className="text-sm md:text-base font-semibold opacity-90">Student Members</div>
             </div>
             <div className="text-center transform hover:scale-110 transition-transform duration-300 cursor-pointer">
               <div className="text-4xl md:text-5xl font-black mb-2 animate-fadeInUp stagger-1 text-primary">UGX 800k+</div>
-              <div className="text-sm md:text-base font-semibold opacity-90">Total Savings</div>
+              <div className="text-sm md:text-base font-semibold opacity-90">Student Savings</div>
             </div>
             <div className="text-center transform hover:scale-110 transition-transform duration-300 cursor-pointer">
-              <div className="text-4xl md:text-5xl font-black mb-2 animate-fadeInUp stagger-2 text-primary">98%</div>
-              <div className="text-sm md:text-base font-semibold opacity-90">Satisfaction Rate</div>
+              <div className="text-4xl md:text-5xl font-black mb-2 animate-fadeInUp stagger-2 text-primary">15+</div>
+              <div className="text-sm md:text-base font-semibold opacity-90">Universities Served</div>
             </div>
             <div className="text-center transform hover:scale-110 transition-transform duration-300 cursor-pointer">
               <div className="text-4xl md:text-5xl font-black mb-2 animate-fadeInUp stagger-3 text-primary">10+</div>
@@ -83,8 +83,8 @@ export default function Home() {
       <section className="py-16 bg-white dark:bg-gray-900/50 scroll-reveal">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 animate-fadeInUp">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">Why Choose SomaSave SACCO?</h2>
-            <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">Everything you need to achieve your financial goals.</p>
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">Why University Students Choose SomaSave SACCO?</h2>
+            <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">Everything you need to achieve your financial goals as a student.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             <div className="group flex flex-col gap-4 p-6 text-center items-center rounded-2xl border-2 border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 hover:border-primary hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 animate-scaleIn stagger-1 cursor-pointer">
@@ -92,8 +92,8 @@ export default function Home() {
                 <span className="material-symbols-outlined text-3xl">savings</span>
               </div>
               <div>
-                <p className="text-gray-900 dark:text-white text-lg font-bold leading-normal mb-2">Flexible Savings</p>
-                <p className="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">Securely grow your money with competitive interest rates.</p>
+                <p className="text-gray-900 dark:text-white text-lg font-bold leading-normal mb-2">Student Savings Plans</p>
+                <p className="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">Flexible savings designed for students with competitive interest rates.</p>
               </div>
             </div>
             
@@ -102,8 +102,8 @@ export default function Home() {
                 <span className="material-symbols-outlined text-3xl">payments</span>
               </div>
               <div>
-                <p className="text-gray-900 dark:text-white text-lg font-bold leading-normal mb-2">Affordable Loans</p>
-                <p className="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">Access funds with fair and transparent loan terms.</p>
+                <p className="text-gray-900 dark:text-white text-lg font-bold leading-normal mb-2">Student-Friendly Loans</p>
+                <p className="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">Access emergency funds, tuition support, and project financing.</p>
               </div>
             </div>
             
@@ -113,7 +113,7 @@ export default function Home() {
               </div>
               <div>
                 <p className="text-gray-900 dark:text-white text-lg font-bold leading-normal mb-2">Mobile Money</p>
-                <p className="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">Manage finances on the go with mobile integration.</p>
+                <p className="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">Manage finances on campus with mobile money integration.</p>
               </div>
             </div>
             
@@ -122,8 +122,8 @@ export default function Home() {
                 <span className="material-symbols-outlined text-3xl">star</span>
               </div>
               <div>
-                <p className="text-gray-900 dark:text-white text-lg font-bold leading-normal mb-2">Member Benefits</p>
-                <p className="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">Enjoy dividends, education, and a supportive community.</p>
+                <p className="text-gray-900 dark:text-white text-lg font-bold leading-normal mb-2">Student Benefits</p>
+                <p className="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">Enjoy dividends, financial literacy, and student community support.</p>
               </div>
             </div>
           </div>
@@ -160,8 +160,8 @@ export default function Home() {
       <section className="py-16 bg-white dark:bg-gray-900/50 scroll-reveal">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 animate-fadeInUp">
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">What Our Members Say</h2>
-            <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">Real stories from our community.</p>
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">What Our Student Members Say</h2>
+            <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">Real stories from university students across Uganda.</p>
           </div>
           
           {/* Mobile: Stack, Tablet+: Horizontal Scroll */}
@@ -169,22 +169,22 @@ export default function Home() {
             {[
               { 
                 name: 'Bakashaba Mark', 
-                text: '"The mobile money payment feature is so convenient! Managing my savings has never been easier."',
+                text: '"As a Makerere student, the mobile money feature makes saving from my allowance so convenient!"',
                 image: 'Bakashaba Mark.jpg'
               },
               { 
                 name: 'Alinda M.', 
-                text: '"Joining this SACCO was the best decision I made for my finances. The community support is amazing!"',
+                text: '"Joining this SACCO as a Kyambogo student was my best financial decision. The student community is amazing!"',
                 image: 'Alinda Mark.jpg'
               },
               { 
                 name: 'Grace A.', 
-                text: '"Being part of this SACCO feels like being part of a family. They truly care about our financial growth."',
+                text: '"SomaSave helped me pay my tuition on time. They truly understand the financial needs of students!"',
                 image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAWlBxi1ttj7UXVc5_hwPmN56rOSnHlGEtyCQDGvhhguGpKdOkH55X3ZxrCThbouN8emV0bZQBXVGuc1HkOfTnkCTel0E8xFGH0dinFU3r_kRAIrlKJoLZDFhNV_3iOXBljfoeKjIIYpke2u17ZxQO9GOGF1BXteRPVhmpjWc92VlcKkHiGbL9R19vuSMk4P_dSWMrl1DBaVtGn56kseXyOU2fE5WnYCxB2HpNShb7Yaw8mIQlpQW0btjPX8hlyTOBA-G4nNtjiboHA'
               },
               { 
                 name: 'John L.', 
-                text: '"Their financial education workshops have been invaluable. I feel more confident managing my money."',
+                text: '"The financial literacy workshops helped me budget my student loan. Essential for every university student!"',
                 image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAsFs1QwTyIsw2PORw1s6COi_8Q4CC71f3X06SpuSrpnYEKj5tlnAl9Pf0CGoWnYLjsHwBt6YEt3Yuuoq1SeVHCx1TzpPFAwm707VyL2E6JK6VjVjQXV2jB_dtpZ9NQYejkgqzFmggKbk7xG5dS7ZC5oSirL1R2oV28ELeb2datbQhI3uXf_dT34lS4rEcyS1vzjHpjlO0wjEoixj08iibIbh5EP_LQdDampijK4l8f4pdNcmnSuK9Gi4fmaLNuJ8TMBIKooglSfNpW'
               }
             ].map((testimonial, index) => (
@@ -221,8 +221,8 @@ export default function Home() {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-gray-800 via-gray-900 to-gray-800 dark:from-gray-900 dark:via-black dark:to-gray-900 scroll-reveal">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl font-black text-white mb-4 animate-fadeInUp">Ready to Start Your Financial Journey?</h2>
-          <p className="text-lg text-gray-300 mb-8 animate-fadeInUp stagger-1">Join thousands of members who are building a better financial future.</p>
+          <h2 className="text-3xl sm:text-4xl font-black text-white mb-4 animate-fadeInUp">Ready to Start Your Student Financial Journey?</h2>
+          <p className="text-lg text-gray-300 mb-8 animate-fadeInUp stagger-1">Join university students across Uganda who are building a better financial future.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fadeInUp stagger-2">
             <button className="flex items-center justify-center gap-2 rounded-full h-14 px-8 bg-primary text-gray-900 text-base font-bold hover:opacity-90 transform hover:scale-105 transition-all shadow-xl">
               <span className="material-symbols-outlined">how_to_reg</span>
