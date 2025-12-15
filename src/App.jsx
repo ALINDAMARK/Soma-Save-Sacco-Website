@@ -25,29 +25,40 @@ function ScrollToTop() {
 }
 
 function App() {
+  const location = useLocation();
+  const isMemberPortal = location.pathname === '/member-portal';
+
+  return (
+    <ThemeProvider>
+      <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark transition-colors duration-300">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/loan-application" element={<LoanApplication />} />
+          <Route path="/member-portal" element={<MemberPortal />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Routes>
+        {!isMemberPortal && <Footer />}
+        <WhatsAppButton />
+      </div>
+    </ThemeProvider>
+  );
+}
+
+function AppWrapper() {
   return (
     <ThemeProvider>
       <Router>
         <ScrollToTop />
-        <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark transition-colors duration-300">
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/loan-application" element={<LoanApplication />} />
-            <Route path="/member-portal" element={<MemberPortal />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-          </Routes>
-          <Footer />
-          <WhatsAppButton />
-        </div>
+        <App />
       </Router>
     </ThemeProvider>
   );
 }
 
-export default App;
+export default AppWrapper;

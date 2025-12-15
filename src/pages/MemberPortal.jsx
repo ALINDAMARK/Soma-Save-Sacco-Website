@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import MySavings from '../components/MySavings';
+import MyLoans from '../components/MyLoans';
+import Transactions from '../components/Transactions';
+import Profile from '../components/Profile';
+import Settings from '../components/Settings';
 
 export default function MemberPortal() {
   const navigate = useNavigate();
@@ -114,9 +119,10 @@ export default function MemberPortal() {
   const displayName = user.first_name || user.username;
 
   return (
-    <main className="flex-1 bg-background-light dark:bg-background-dark">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-6">
+    <>
+      <main className="flex-1 bg-background-light dark:bg-background-dark">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex gap-6">
           {/* Sidebar */}
           <aside className="w-64 flex-shrink-0 hidden lg:block">
             <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-6 sticky top-8">
@@ -286,15 +292,49 @@ export default function MemberPortal() {
             )}
 
             {activeTab !== 'overview' && (
-              <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-12 text-center animate-fadeIn">
-                <span className="material-symbols-outlined text-6xl text-gray-400 dark:text-gray-600 mb-4">construction</span>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{navItems.find(item => item.id === activeTab)?.label}</h2>
-                <p className="text-gray-600 dark:text-gray-400">This section is under development.</p>
-              </div>
+              <>
+                {activeTab === 'savings' && (
+                  <MySavings user={user} accounts={accounts} />
+                )}
+                
+                {activeTab === 'loans' && (
+                  <MyLoans user={user} />
+                )}
+                
+                {activeTab === 'transactions' && (
+                  <Transactions user={user} recent_transactions={recent_transactions} />
+                )}
+                
+                {activeTab === 'profile' && (
+                  <Profile 
+                    user={user} 
+                    onUpdate={(updatedUser) => {
+                      setDashboardData(prev => ({
+                        ...prev,
+                        user: updatedUser
+                      }));
+                    }} 
+                  />
+                )}
+                
+                {activeTab === 'settings' && (
+                  <Settings user={user} />
+                )}
+              </>
             )}
           </div>
         </div>
       </div>
-    </main>
+      </main>
+      
+      {/* Copyright Footer */}
+      <footer className="bg-white dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-base text-gray-400 dark:text-gray-500">
+            © 2025 SomaSave SACCO. All rights reserved.
+          </p>
+        </div>
+      </footer>
+    </>
   );
 }
