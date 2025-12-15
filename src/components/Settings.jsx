@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { useSettings } from '../context/SettingsContext';
+import api from '../services/api';
 
 export default function Settings({ user }) {
   const { theme, toggleTheme } = useTheme();
+  const { settings: globalSettings, updateSettings: updateGlobalSettings, loadSettings } = useSettings();
   const [settings, setSettings] = useState({
     emailNotifications: true,
     smsNotifications: false,
@@ -15,6 +18,43 @@ export default function Settings({ user }) {
   });
   const [message, setMessage] = useState({ type: '', text: '' });
   const [loading, setLoading] = useState(false);
+  const [loadingSettings, setLoadingSettings] = useState(true);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
+  // Load user settings on component mount
+  useEffect(() => {
+    loadUserSettings();
+  }, []);
+
+  const loadUserSettings = async () => {
+    try {
+      setLoadingSettings(true);
+      const data = await api.settings.get();
+      
+      // Map backend field names to frontend state
+      setSettings({
+        emailNotifications: data.email_notifications,
+        smsNotifications: data.sms_notifications,
+        transactionAlerts: data.transaction_alerts,
+        loanReminders: data.loan_reminders,
+        marketingEmails: data.marketing_emails,
+        language: data.language,
+        currency: data.currency,
+        twoFactorAuth: data.two_factor_auth,
+      });
+    } catch (err) {
+      console.error('Failed to load settings:', err);
+      setMessage({ type: 'error', text: 'Failed to load settings.' });
+    } finally {
+      setLoadingSettings(false);
+    }
+  };
 
   const handleToggle = (setting) => {
     setSettings(prev => ({
@@ -35,10 +75,30 @@ export default function Settings({ user }) {
       setLoading(true);
       setMessage({ type: '', text: '' });
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Map frontend state to backend field names
+      const settingsData = {
+        email_notifications: settings.emailNotifications,
+        sms_notifications: settings.smsNotifications,
+        transaction_alerts: settings.transactionAlerts,
+        loan_reminders: settings.loanReminders,
+        marketing_emails: settings.marketingEmails,
+        language: settings.language,
+        currency: settings.currency,
+        two_factor_auth: settings.twoFactorAuth,
+      };
       
-      setMessage({ type: 'success', text: 'Settings saved successfully!' });
+      const response = await api.settings.update(settingsData);
+      
+      // Update global settings context
+      updateGlobalSettings({
+        language: settings.language,
+        currency: settings.currency,
+      });
+      
+      // Reload settings to ensure sync
+      await loadSettings();
+      
+      setMessage({ type: 'success', text: response.message || 'Settings saved successfully!' });
       
       // Clear message after 3 seconds
       setTimeout(() => {
@@ -46,11 +106,59 @@ export default function Settings({ user }) {
       }, 3000);
     } catch (err) {
       console.error('Failed to save settings:', err);
-      setMessage({ type: 'error', text: 'Failed to save settings. Please try again.' });
+      setMessage({ type: 'error', text: err.message || 'Failed to save settings. Please try again.' });
     } finally {
       setLoading(false);
     }
   };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setMessage({ type: 'error', text: 'New passwords do not match' });
+      return;
+    }
+    
+    if (passwordData.newPassword.length < 8) {
+      setMessage({ type: 'error', text: 'Password must be at least 8 characters long' });
+      return;
+    }
+    
+    try {
+      setPasswordLoading(true);
+      setMessage({ type: '', text: '' });
+      
+      const response = await api.profile.changePassword(
+        passwordData.currentPassword,
+        passwordData.newPassword
+      );
+      
+      setMessage({ type: 'success', text: response.message || 'Password changed successfully!' });
+      setShowPasswordModal(false);
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      
+      setTimeout(() => {
+        setMessage({ type: '', text: '' });
+      }, 3000);
+    } catch (err) {
+      console.error('Failed to change password:', err);
+      setMessage({ type: 'error', text: err.message || 'Failed to change password' });
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  if (loadingSettings) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading settings...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -274,7 +382,10 @@ export default function Settings({ user }) {
             </button>
           </div>
 
-          <button className="w-full flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-primary hover:bg-primary/5 transition-all">
+          <button 
+            onClick={() => setShowPasswordModal(true)}
+            className="w-full flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-primary hover:bg-primary/5 transition-all"
+          >
             <div className="flex items-center gap-3">
               <span className="material-symbols-outlined text-primary">lock</span>
               <div className="text-left">
@@ -337,6 +448,84 @@ export default function Settings({ user }) {
           {loading ? 'Saving...' : 'Save Settings'}
         </button>
       </div>
+
+      {/* Change Password Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full p-8 animate-fadeInUp">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Change Password</h3>
+              <button
+                onClick={() => setShowPasswordModal(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Current Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={passwordData.currentPassword}
+                  onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+                  placeholder="Enter current password"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={passwordData.newPassword}
+                  onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+                  placeholder="Enter new password"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={passwordData.confirmPassword}
+                  onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+                  placeholder="Confirm new password"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordModal(false)}
+                  className="flex-1 px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={passwordLoading}
+                  className="flex-1 px-4 py-3 rounded-lg bg-primary text-gray-900 font-semibold hover:opacity-90 transition-all disabled:opacity-50"
+                >
+                  {passwordLoading ? 'Changing...' : 'Change Password'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

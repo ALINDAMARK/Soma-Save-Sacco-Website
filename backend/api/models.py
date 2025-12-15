@@ -58,6 +58,16 @@ class CustomUser(AbstractUser):
     otp_code = models.CharField(max_length=6, null=True, blank=True)
     otp_created_at = models.DateTimeField(null=True, blank=True)
     
+    # Settings/Preferences
+    email_notifications = models.BooleanField(default=True)
+    sms_notifications = models.BooleanField(default=False)
+    transaction_alerts = models.BooleanField(default=True)
+    loan_reminders = models.BooleanField(default=True)
+    marketing_emails = models.BooleanField(default=False)
+    language = models.CharField(max_length=10, default='en')
+    currency = models.CharField(max_length=10, default='UGX')
+    two_factor_auth = models.BooleanField(default=False)
+    
     class Meta:
         db_table = 'clients_portal_customuser'
     

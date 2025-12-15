@@ -270,6 +270,84 @@ const api = {
       return response.json();
     },
   },
+
+  // User Settings
+  settings: {
+    get: async () => {
+      const response = await fetch(`${API_BASE_URL}/users/settings/`, {
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch settings');
+      }
+      
+      return response.json();
+    },
+
+    update: async (settingsData) => {
+      const csrftoken = getCookie('csrftoken');
+      const response = await fetch(`${API_BASE_URL}/users/settings/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        },
+        credentials: 'include',
+        body: JSON.stringify(settingsData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update settings');
+      }
+      
+      return response.json();
+    },
+  },
+
+  // User Profile
+  profile: {
+    update: async (profileData) => {
+      const csrftoken = getCookie('csrftoken');
+      const response = await fetch(`${API_BASE_URL}/users/update-profile/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        },
+        credentials: 'include',
+        body: JSON.stringify(profileData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update profile');
+      }
+      
+      return response.json();
+    },
+
+    changePassword: async (currentPassword, newPassword) => {
+      const csrftoken = getCookie('csrftoken');
+      const response = await fetch(`${API_BASE_URL}/users/change-password/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        },
+        credentials: 'include',
+        body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to change password');
+      }
+      
+      return response.json();
+    },
+  },
 };
 
 export default api;

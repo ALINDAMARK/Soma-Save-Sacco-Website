@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useSettings } from '../context/SettingsContext';
 import api from '../services/api';
 import MySavings from '../components/MySavings';
 import MyLoans from '../components/MyLoans';
@@ -9,6 +10,7 @@ import Settings from '../components/Settings';
 
 export default function MemberPortal() {
   const navigate = useNavigate();
+  const { formatCurrency, t } = useSettings();
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
@@ -64,12 +66,12 @@ export default function MemberPortal() {
   }, []);
 
   const navItems = [
-    { id: 'overview', label: 'Overview', icon: 'dashboard' },
-    { id: 'savings', label: 'My Savings', icon: 'savings' },
-    { id: 'loans', label: 'My Loans', icon: 'payments' },
-    { id: 'transactions', label: 'Transactions', icon: 'receipt_long' },
-    { id: 'profile', label: 'Profile', icon: 'person' },
-    { id: 'settings', label: 'Settings', icon: 'settings' }
+    { id: 'overview', label: t('overview'), icon: 'dashboard' },
+    { id: 'savings', label: t('savings'), icon: 'savings' },
+    { id: 'loans', label: t('loans'), icon: 'payments' },
+    { id: 'transactions', label: t('transactions'), icon: 'receipt_long' },
+    { id: 'profile', label: t('profile'), icon: 'person' },
+    { id: 'settings', label: t('settings'), icon: 'settings' }
   ];
 
   const handleLogout = async () => {
@@ -165,7 +167,7 @@ export default function MemberPortal() {
                 className="mt-4 w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
               >
                 <span className="material-symbols-outlined">logout</span>
-                <span className="font-semibold">Logout</span>
+                <span className="font-semibold">{t('logout')}</span>
               </button>
             </div>
           </aside>
@@ -193,9 +195,9 @@ export default function MemberPortal() {
                       </div>
                       <span className="text-sm font-semibold text-primary">{stats.savings_growth}</span>
                     </div>
-                    <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">Total Savings</h3>
+                    <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{t('totalSavings')}</h3>
                     <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                      UGX {parseFloat(stats.total_savings).toLocaleString()}
+                      {formatCurrency(stats.total_savings)}
                     </p>
                   </div>
 
@@ -208,7 +210,7 @@ export default function MemberPortal() {
                         {stats.active_loans_count > 0 ? 'Active' : 'None'}
                       </span>
                     </div>
-                    <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">Active Loans</h3>
+                    <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{t('activeLoans')}</h3>
                     <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.active_loans_count}</p>
                   </div>
 
@@ -220,17 +222,17 @@ export default function MemberPortal() {
                       <span className="text-sm font-semibold text-primary">Earned</span>
                     </div>
                     <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                      Dividends ({new Date().getFullYear()})
+                      {t('dividends')} ({new Date().getFullYear()})
                     </h3>
                     <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                      UGX {parseFloat(stats.dividends).toLocaleString()}
+                      {formatCurrency(stats.dividends)}
                     </p>
                   </div>
                 </div>
 
                 {/* Recent Transactions */}
                 <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-8 animate-fadeInUp">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Recent Transactions</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('recentTransactions')}</h2>
                   {recent_transactions && recent_transactions.length > 0 ? (
                     <div className="space-y-4">
                       {recent_transactions.map((transaction, index) => (
@@ -253,7 +255,10 @@ export default function MemberPortal() {
                               ? 'text-green-600' 
                               : 'text-red-600'
                           }`}>
-                            UGX {transaction.amount.startsWith('-') ? transaction.amount.substring(1) : '+' + transaction.amount}
+                            {transaction.amount.startsWith('-') 
+                              ? '-' + formatCurrency(transaction.amount.substring(1))
+                              : '+' + formatCurrency(transaction.amount.startsWith('+') ? transaction.amount.substring(1) : transaction.amount)
+                            }
                           </p>
                         </div>
                       ))}

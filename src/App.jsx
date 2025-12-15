@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
+import { SettingsProvider } from './context/SettingsContext';
 import { useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -57,10 +58,12 @@ function App() {
 function AppWrapper() {
   return (
     <ThemeProvider>
-      <Router>
-        <ScrollToTop />
-        <App />
-      </Router>
+      <SettingsProvider>
+        <Router>
+          <ScrollToTop />
+          <App />
+        </Router>
+      </SettingsProvider>
     </ThemeProvider>
   );
 }

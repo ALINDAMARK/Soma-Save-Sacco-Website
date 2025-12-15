@@ -17,7 +17,7 @@ from .serializers import (
     LoanSerializer, PaymentSerializer, RepaymentScheduleSerializer, 
     ReportSerializer, NationalIDVerificationSerializer, RegisterSerializer,
     UniversitySerializer, CourseSerializer, PasswordResetRequestSerializer,
-    PasswordResetConfirmSerializer
+    PasswordResetConfirmSerializer, UserSettingsSerializer
 )
 
 # Create your views here.
@@ -51,6 +51,68 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         """Get current user's profile"""
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
+    
+    @action(detail=False, methods=['patch'], url_path='update-profile')
+    def update_profile(self, request):
+        """Update current user's profile"""
+        user = request.user
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['get', 'patch'], url_path='settings')
+    def user_settings(self, request):
+        """Get or update user settings"""
+        user = request.user
+        
+        if request.method == 'GET':
+            serializer = UserSettingsSerializer(user)
+            return Response(serializer.data)
+        
+        elif request.method == 'PATCH':
+            serializer = UserSettingsSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    'message': 'Settings updated successfully',
+                    'settings': serializer.data
+                })
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['post'], url_path='change-password')
+    def change_password(self, request):
+        """Change user password"""
+        user = request.user
+        current_password = request.data.get('current_password')
+        new_password = request.data.get('new_password')
+        
+        if not current_password or not new_password:
+            return Response(
+                {'error': 'Both current and new password are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check current password
+        if not user.check_password(current_password):
+            return Response(
+                {'error': 'Current password is incorrect'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate new password length
+        if len(new_password) < 8:
+            return Response(
+                {'error': 'New password must be at least 8 characters long'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Set new password
+        user.set_password(new_password)
+        user.save()
+        
+        return Response({'message': 'Password changed successfully'})
 
 
 class AccountViewSet(viewsets.ModelViewSet):
