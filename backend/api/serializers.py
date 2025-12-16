@@ -241,20 +241,22 @@ class PasswordResetRequestSerializer(serializers.Serializer):
         logger.info(f"Using FRONTEND_URL: {frontend_url}")
         reset_link = f"{frontend_url}/reset-password/{uid}/{token}"
         
-        # Check if email is configured
+        # CRITICAL: Check if email is configured BEFORE attempting to send
         if not settings.EMAIL_HOST_PASSWORD:
-            logger.error(f"EMAIL_HOST_PASSWORD not set - cannot send email to {email}")
+            logger.error(f"❌ CRITICAL: EMAIL_HOST_PASSWORD not set in Railway environment variables!")
             logger.error(f"EMAIL_HOST: {getattr(settings, 'EMAIL_HOST', 'NOT SET')}")
             logger.error(f"EMAIL_HOST_USER: {getattr(settings, 'EMAIL_HOST_USER', 'NOT SET')}")
             logger.error(f"EMAIL_PORT: {getattr(settings, 'EMAIL_PORT', 'NOT SET')}")
+            logger.error(f"Go to Railway dashboard → Variables → Add: EMAIL_HOST_PASSWORD=vcvFuYXnRn0R")
             raise serializers.ValidationError(
                 "Email service is not configured. Please contact support at info@somasave.com or WhatsApp +256 763 200075"
             )
         
-        logger.info(f"Email configuration check passed for {email}")
-        logger.info(f"EMAIL_HOST: {settings.EMAIL_HOST}")
-        logger.info(f"EMAIL_PORT: {settings.EMAIL_PORT}")
-        logger.info(f"EMAIL_HOST_USER: {settings.EMAIL_HOST_USER}")
+        logger.info(f"✅ Email configuration validated for {email}")
+        logger.info(f"📧 EMAIL_HOST: {settings.EMAIL_HOST}")
+        logger.info(f"🔌 EMAIL_PORT: {settings.EMAIL_PORT}")
+        logger.info(f"👤 EMAIL_HOST_USER: {settings.EMAIL_HOST_USER}")
+        logger.info(f"🔑 EMAIL_HOST_PASSWORD: {'SET ✓' if settings.EMAIL_HOST_PASSWORD else 'NOT SET ✗'}")
         
         # Send email
         subject = 'SomaSave SACCO - Password Reset Request'
@@ -384,14 +386,19 @@ For assistance, contact us at info@somasave.com
             
             def send_email_async():
                 """Send email in background thread to prevent worker timeout"""
+                import traceback
+                
                 ports_to_try = [
                     (587, True, False),   # Port 587 with TLS
                     (465, False, True),   # Port 465 with SSL (fallback)
                 ]
                 
+                logger.info(f"🚀 Background thread started for {email}")
+                
                 for port, use_tls, use_ssl in ports_to_try:
                     try:
-                        logger.info(f"Trying port {port} (TLS={use_tls}, SSL={use_ssl})")
+                        logger.info(f"🔌 Trying {settings.EMAIL_HOST}:{port} (TLS={use_tls}, SSL={use_ssl})")
+                        logger.info(f"👤 From: {settings.EMAIL_HOST_USER} → To: {email}")
                         
                         # Set aggressive timeout to prevent hanging
                         socket.setdefaulttimeout(10)
@@ -407,6 +414,8 @@ For assistance, contact us at info@somasave.com
                             timeout=10
                         )
                         
+                        logger.info(f"📨 Connection created, preparing email message...")
+                        
                         email_message = EmailMultiAlternatives(
                             subject=subject,
                             body=text_message,
@@ -416,16 +425,34 @@ For assistance, contact us at info@somasave.com
                         )
                         
                         email_message.attach_alternative(html_message, "text/html")
+                        
+                        logger.info(f"📤 Sending email to {email}...")
                         email_message.send(fail_silently=False)
                         
-                        logger.info(f"✅ Password reset email sent successfully to {email} via port {port}")
+                        logger.info(f"✅✅✅ SUCCESS! Password reset email sent to {email} via port {port} ✅✅✅")
                         return  # Success, exit thread
                         
                     except Exception as e:
-                        logger.error(f"❌ Port {port} failed: {str(e)}")
+                        error_msg = str(e)
+                        logger.error(f"❌ Port {port} failed: {error_msg}")
+                        logger.error(f"Error type: {type(e).__name__}")
+                        
+                        # Log detailed error info
+                        if 'authentication' in error_msg.lower() or '535' in error_msg or '534' in error_msg:
+                            logger.error(f"🔐 AUTHENTICATION FAILED - Wrong password or account locked")
+                            logger.error(f"Check: EMAIL_HOST_PASSWORD in Railway = vcvFuYXnRn0R")
+                        elif 'connection refused' in error_msg.lower() or 'errno 111' in error_msg:
+                            logger.error(f"🚫 CONNECTION REFUSED - Port {port} blocked by Railway firewall")
+                        elif 'timeout' in error_msg.lower() or 'timed out' in error_msg.lower():
+                            logger.error(f"⏱️ TIMEOUT - Connection took too long on port {port}")
+                        
                         if port == ports_to_try[-1][0]:  # Last port
-                            logger.error(f"All ports failed for {email}. Email not sent.")
-                            logger.error(f"User should contact support: info@somasave.com")
+                            logger.error(f"❌❌❌ ALL PORTS FAILED for {email} - Email NOT sent ❌❌❌")
+                            logger.error(f"User should contact: info@somasave.com or WhatsApp +256 763 200075")
+                            
+                            # Log full traceback for last failure
+                            import traceback
+                            logger.error(f"Full error trace:\n{traceback.format_exc()}")
             
             # Start email sending in background thread
             email_thread = threading.Thread(target=send_email_async, daemon=True)
