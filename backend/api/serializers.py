@@ -378,12 +378,13 @@ For assistance, contact us at info@somasave.com
         
         try:
             # Use threading to send email asynchronously and prevent worker timeout
-            from django.core.mail import EmailMultiAlternatives
             import threading
             
             logger.info(f"📧 Attempting to send password reset email to {email}")
-            logger.info(f"📮 Using email backend: {settings.EMAIL_BACKEND}")
-            logger.info(f"🌐 Email host: {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
+            
+            # Check if using Resend
+            use_resend = getattr(settings, 'USE_RESEND', False)
+            logger.info(f"📮 Using Resend API: {use_resend}")
             
             def send_email_async():
                 """Send email in background thread to prevent worker timeout"""
@@ -393,20 +394,41 @@ For assistance, contact us at info@somasave.com
                     logger.info(f"🚀 Background thread started for {email}")
                     logger.info(f"👤 From: {settings.DEFAULT_FROM_EMAIL} → To: {email}")
                     
-                    # Use the default configured connection from settings
-                    email_message = EmailMultiAlternatives(
-                        subject=subject,
-                        body=text_message,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        to=[email]
-                    )
-                    
-                    email_message.attach_alternative(html_message, "text/html")
-                    
-                    logger.info(f"📤 Sending email to {email}...")
-                    email_message.send(fail_silently=False)
-                    
-                    logger.info(f"✅✅✅ SUCCESS! Password reset email sent to {email} ✅✅✅")
+                    if use_resend:
+                        # Use Resend API (works on Railway)
+                        import resend
+                        
+                        resend.api_key = settings.RESEND_API_KEY
+                        
+                        logger.info(f"📤 Sending via Resend API to {email}...")
+                        
+                        params = {
+                            "from": settings.DEFAULT_FROM_EMAIL,
+                            "to": [email],
+                            "subject": subject,
+                            "html": html_message,
+                        }
+                        
+                        response = resend.Emails.send(params)
+                        logger.info(f"✅✅✅ SUCCESS! Resend API response: {response} ✅✅✅")
+                        
+                    else:
+                        # Use Django email backend (SMTP for localhost)
+                        from django.core.mail import EmailMultiAlternatives
+                        
+                        logger.info(f"📤 Sending via SMTP to {email}...")
+                        
+                        email_message = EmailMultiAlternatives(
+                            subject=subject,
+                            body=text_message,
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            to=[email]
+                        )
+                        
+                        email_message.attach_alternative(html_message, "text/html")
+                        email_message.send(fail_silently=False)
+                        
+                        logger.info(f"✅✅✅ SUCCESS! SMTP email sent to {email} ✅✅✅")
                     
                 except Exception as e:
                     error_msg = str(e)
@@ -415,13 +437,14 @@ For assistance, contact us at info@somasave.com
                     logger.error(f"Full error trace:\n{traceback.format_exc()}")
                     
                     # Log detailed error info
-                    if 'authentication' in error_msg.lower() or '535' in error_msg or '534' in error_msg:
-                        logger.error(f"🔐 AUTHENTICATION FAILED - Wrong API key or password")
+                    if 'api' in error_msg.lower() or 'resend' in error_msg.lower():
+                        logger.error(f"🔐 Resend API ERROR - Check RESEND_API_KEY in Railway")
+                    elif 'authentication' in error_msg.lower() or '535' in error_msg or '534' in error_msg:
+                        logger.error(f"🔐 AUTHENTICATION FAILED - Wrong password")
                     elif 'connection refused' in error_msg.lower() or 'errno 111' in error_msg:
                         logger.error(f"🚫 CONNECTION REFUSED - Port blocked by firewall")
                     elif 'timeout' in error_msg.lower() or 'timed out' in error_msg.lower():
-                        logger.error(f"⏱️ TIMEOUT - SMTP ports blocked by Railway. Use SendGrid instead!")
-                        logger.error(f"Set USE_SENDGRID=True in Railway environment variables")
+                        logger.error(f"⏱️ TIMEOUT - SMTP blocked. Set USE_RESEND=True in Railway!")
                     
                     logger.error(f"❌❌❌ Email NOT sent to {email} ❌❌❌")
                     logger.error(f"User should contact: info@somasave.com or WhatsApp +256 763 200075")

@@ -201,19 +201,11 @@ REST_FRAMEWORK = {
 }
 
 # Email Configuration
-# Use SendGrid for production (Railway blocks SMTP), SMTP for local development
-USE_SENDGRID = os.getenv('USE_SENDGRID', 'False') == 'True'
+# Use Resend for production (Railway blocks SMTP), SMTP for local development
+USE_RESEND = os.getenv('USE_RESEND', 'False') == 'True'
+RESEND_API_KEY = os.getenv('RESEND_API_KEY')
 
-if USE_SENDGRID:
-    # SendGrid configuration (works on Railway)
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.sendgrid.net'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = 'apikey'  # Always 'apikey' for SendGrid
-    EMAIL_HOST_PASSWORD = os.getenv('SENDGRID_API_KEY')
-    SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
-else:
+if not USE_RESEND:
     # Zoho SMTP configuration (for local development)
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.zoho.com')
