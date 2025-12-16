@@ -378,87 +378,59 @@ For assistance, contact us at info@somasave.com
         
         try:
             # Use threading to send email asynchronously and prevent worker timeout
-            from django.core.mail import get_connection, EmailMultiAlternatives
+            from django.core.mail import EmailMultiAlternatives
             import threading
-            import socket
             
-            logger.info(f"Attempting to send password reset email to {email}")
+            logger.info(f"📧 Attempting to send password reset email to {email}")
+            logger.info(f"📮 Using email backend: {settings.EMAIL_BACKEND}")
+            logger.info(f"🌐 Email host: {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
             
             def send_email_async():
                 """Send email in background thread to prevent worker timeout"""
                 import traceback
                 
-                ports_to_try = [
-                    (587, True, False),   # Port 587 with TLS
-                    (465, False, True),   # Port 465 with SSL (fallback)
-                ]
-                
-                logger.info(f"🚀 Background thread started for {email}")
-                
-                for port, use_tls, use_ssl in ports_to_try:
-                    try:
-                        logger.info(f"🔌 Trying {settings.EMAIL_HOST}:{port} (TLS={use_tls}, SSL={use_ssl})")
-                        logger.info(f"👤 From: {settings.EMAIL_HOST_USER} → To: {email}")
-                        
-                        # Set aggressive timeout to prevent hanging
-                        socket.setdefaulttimeout(10)
-                        
-                        connection = get_connection(
-                            backend='django.core.mail.backends.smtp.EmailBackend',
-                            host=settings.EMAIL_HOST,
-                            port=port,
-                            username=settings.EMAIL_HOST_USER,
-                            password=settings.EMAIL_HOST_PASSWORD,
-                            use_tls=use_tls,
-                            use_ssl=use_ssl,
-                            timeout=10
-                        )
-                        
-                        logger.info(f"📨 Connection created, preparing email message...")
-                        
-                        email_message = EmailMultiAlternatives(
-                            subject=subject,
-                            body=text_message,
-                            from_email=settings.DEFAULT_FROM_EMAIL,
-                            to=[email],
-                            connection=connection
-                        )
-                        
-                        email_message.attach_alternative(html_message, "text/html")
-                        
-                        logger.info(f"📤 Sending email to {email}...")
-                        email_message.send(fail_silently=False)
-                        
-                        logger.info(f"✅✅✅ SUCCESS! Password reset email sent to {email} via port {port} ✅✅✅")
-                        return  # Success, exit thread
-                        
-                    except Exception as e:
-                        error_msg = str(e)
-                        logger.error(f"❌ Port {port} failed: {error_msg}")
-                        logger.error(f"Error type: {type(e).__name__}")
-                        
-                        # Log detailed error info
-                        if 'authentication' in error_msg.lower() or '535' in error_msg or '534' in error_msg:
-                            logger.error(f"🔐 AUTHENTICATION FAILED - Wrong password or account locked")
-                            logger.error(f"Check: EMAIL_HOST_PASSWORD in Railway = vcvFuYXnRn0R")
-                        elif 'connection refused' in error_msg.lower() or 'errno 111' in error_msg:
-                            logger.error(f"🚫 CONNECTION REFUSED - Port {port} blocked by Railway firewall")
-                        elif 'timeout' in error_msg.lower() or 'timed out' in error_msg.lower():
-                            logger.error(f"⏱️ TIMEOUT - Connection took too long on port {port}")
-                        
-                        if port == ports_to_try[-1][0]:  # Last port
-                            logger.error(f"❌❌❌ ALL PORTS FAILED for {email} - Email NOT sent ❌❌❌")
-                            logger.error(f"User should contact: info@somasave.com or WhatsApp +256 763 200075")
-                            
-                            # Log full traceback for last failure
-                            import traceback
-                            logger.error(f"Full error trace:\n{traceback.format_exc()}")
+                try:
+                    logger.info(f"🚀 Background thread started for {email}")
+                    logger.info(f"👤 From: {settings.DEFAULT_FROM_EMAIL} → To: {email}")
+                    
+                    # Use the default configured connection from settings
+                    email_message = EmailMultiAlternatives(
+                        subject=subject,
+                        body=text_message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        to=[email]
+                    )
+                    
+                    email_message.attach_alternative(html_message, "text/html")
+                    
+                    logger.info(f"📤 Sending email to {email}...")
+                    email_message.send(fail_silently=False)
+                    
+                    logger.info(f"✅✅✅ SUCCESS! Password reset email sent to {email} ✅✅✅")
+                    
+                except Exception as e:
+                    error_msg = str(e)
+                    logger.error(f"❌ Email send failed: {error_msg}")
+                    logger.error(f"Error type: {type(e).__name__}")
+                    logger.error(f"Full error trace:\n{traceback.format_exc()}")
+                    
+                    # Log detailed error info
+                    if 'authentication' in error_msg.lower() or '535' in error_msg or '534' in error_msg:
+                        logger.error(f"🔐 AUTHENTICATION FAILED - Wrong API key or password")
+                    elif 'connection refused' in error_msg.lower() or 'errno 111' in error_msg:
+                        logger.error(f"🚫 CONNECTION REFUSED - Port blocked by firewall")
+                    elif 'timeout' in error_msg.lower() or 'timed out' in error_msg.lower():
+                        logger.error(f"⏱️ TIMEOUT - SMTP ports blocked by Railway. Use SendGrid instead!")
+                        logger.error(f"Set USE_SENDGRID=True in Railway environment variables")
+                    
+                    logger.error(f"❌❌❌ Email NOT sent to {email} ❌❌❌")
+                    logger.error(f"User should contact: info@somasave.com or WhatsApp +256 763 200075")
             
             # Start email sending in background thread
             email_thread = threading.Thread(target=send_email_async, daemon=True)
             email_thread.start()
             
-            logger.info(f"Email send initiated in background for {email}")
+            logger.info(f"📨 Email send initiated in background for {email}")
                         
         except Exception as e:
             # Log the error but don't block the response

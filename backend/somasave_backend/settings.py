@@ -200,14 +200,29 @@ REST_FRAMEWORK = {
     ],
 }
 
-# Email Configuration (Zoho Mail)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.zoho.com')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
-EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False') == 'True'
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'info@somasave.com')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+# Email Configuration
+# Use SendGrid for production (Railway blocks SMTP), SMTP for local development
+USE_SENDGRID = os.getenv('USE_SENDGRID', 'False') == 'True'
+
+if USE_SENDGRID:
+    # SendGrid configuration (works on Railway)
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.sendgrid.net'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = 'apikey'  # Always 'apikey' for SendGrid
+    EMAIL_HOST_PASSWORD = os.getenv('SENDGRID_API_KEY')
+    SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
+else:
+    # Zoho SMTP configuration (for local development)
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.zoho.com')
+    EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+    EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+    EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False') == 'True'
+    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'info@somasave.com')
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'SomaSave SACCO <info@somasave.com>')
 SERVER_EMAIL = os.getenv('SERVER_EMAIL', 'info@somasave.com')
 EMAIL_TIMEOUT = 30  # 30 seconds timeout for email operations
