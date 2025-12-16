@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 
 export default function About() {
@@ -28,6 +29,23 @@ export default function About() {
 
   return (
     <main className="layout-container flex h-full grow flex-col">
+      <Helmet>
+        <title>About Us - SomaSave SACCO | Student-Focused Financial Services</title>
+        <meta name="description" content="Learn about SomaSave SACCO - Uganda's leading student-focused financial cooperative. Discover our mission to empower university students with flexible savings accounts, affordable loans, and financial literacy programs." />
+        <meta name="keywords" content="about SomaSave SACCO, student SACCO Uganda, university financial services, student cooperative, campus SACCO, student savings, university loans Uganda, financial empowerment students, Makerere SACCO" />
+        <link rel="canonical" href="https://somasave.com/about" />
+        
+        {/* Open Graph */}
+        <meta property="og:title" content="About SomaSave SACCO - Student Financial Services" />
+        <meta property="og:description" content="Learn about SomaSave SACCO - Uganda's leading student-focused financial cooperative empowering university students with savings, loans, and financial literacy." />
+        <meta property="og:url" content="https://somasave.com/about" />
+        <meta property="og:type" content="website" />
+        
+        {/* Twitter */}
+        <meta name="twitter:title" content="About SomaSave SACCO - Student Financial Services" />
+        <meta name="twitter:description" content="Learn about SomaSave SACCO - empowering university students in Uganda with flexible savings, affordable loans, and financial literacy programs." />
+      </Helmet>
+      
       <div className="flex flex-1 justify-center py-5">
         <div className="layout-content-container flex flex-col max-w-5xl flex-1 px-4 sm:px-6 lg:px-8">
           {/* Hero Section */}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -23,6 +24,23 @@ export default function Contact() {
 
   return (
     <main className="flex-1 px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
+      <Helmet>
+        <title>Contact Us - Get Help with Student Savings & Loans | SomaSave SACCO</title>
+        <meta name="description" content="Contact SomaSave SACCO for student financial services support. Get answers about savings accounts, student loans, mobile money, and membership. We're here to help university students in Uganda." />
+        <meta name="keywords" content="contact SomaSave, student SACCO contact, university financial help, student loans inquiry, SACCO membership Uganda, campus banking support, student savings help, Kampala SACCO contact" />
+        <link rel="canonical" href="https://somasave.com/contact" />
+        
+        {/* Open Graph */}
+        <meta property="og:title" content="Contact SomaSave SACCO - Student Financial Support" />
+        <meta property="og:description" content="Contact us for help with student savings accounts, loans, and membership. Supporting university students in Uganda." />
+        <meta property="og:url" content="https://somasave.com/contact" />
+        <meta property="og:type" content="website" />
+        
+        {/* Twitter */}
+        <meta name="twitter:title" content="Contact SomaSave SACCO - Student Financial Support" />
+        <meta name="twitter:description" content="Get help with student savings, loans, and membership. We're here for university students in Uganda." />
+      </Helmet>
+      
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="flex flex-col items-center text-center mb-12 lg:mb-16">

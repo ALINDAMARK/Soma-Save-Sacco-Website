@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from './context/ThemeContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { useEffect } from 'react';
@@ -57,14 +58,16 @@ function App() {
 
 function AppWrapper() {
   return (
-    <ThemeProvider>
-      <SettingsProvider>
-        <Router>
-          <ScrollToTop />
-          <App />
-        </Router>
-      </SettingsProvider>
-    </ThemeProvider>
+    <HelmetProvider>
+      <ThemeProvider>
+        <SettingsProvider>
+          <Router>
+            <ScrollToTop />
+            <App />
+          </Router>
+        </SettingsProvider>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 }
 

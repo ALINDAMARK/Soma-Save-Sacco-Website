@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 
 export default function Services() {
   useEffect(() => {
@@ -27,6 +28,23 @@ export default function Services() {
 
   return (
     <main className="flex-1 px-4 lg:px-10 py-5">
+      <Helmet>
+        <title>Student Financial Services - Savings, Loans & Mobile Money | SomaSave SACCO</title>
+        <meta name="description" content="Explore SomaSave SACCO's student-focused financial services: flexible savings accounts, affordable student loans, mobile money integration, and emergency funds. Tailored for university students in Uganda." />
+        <meta name="keywords" content="student savings accounts, student loans Uganda, mobile money students, university financial services, campus banking, emergency student loans, tuition loans, flexible savings, Makerere students, university SACCO services, student financial aid Uganda" />
+        <link rel="canonical" href="https://somasave.com/services" />
+        
+        {/* Open Graph */}
+        <meta property="og:title" content="Student Financial Services - SomaSave SACCO" />
+        <meta property="og:description" content="Flexible savings accounts, affordable student loans, mobile money integration, and emergency funds tailored for university students in Uganda." />
+        <meta property="og:url" content="https://somasave.com/services" />
+        <meta property="og:type" content="website" />
+        
+        {/* Twitter */}
+        <meta name="twitter:title" content="Student Financial Services - SomaSave SACCO" />
+        <meta name="twitter:description" content="Flexible savings, affordable loans, and mobile money services designed for university students in Uganda." />
+      </Helmet>
+      
       <div className="flex flex-col max-w-7xl mx-auto">
         {/* Hero Section */}
         <section className="w-full py-12 md:py-20">
