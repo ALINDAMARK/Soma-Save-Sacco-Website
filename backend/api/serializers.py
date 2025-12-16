@@ -221,6 +221,9 @@ class PasswordResetRequestSerializer(serializers.Serializer):
     
     def save(self):
         """Send password reset email"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
         email = self.validated_data['email']
         user = CustomUser.objects.get(email=email)
         
@@ -229,18 +232,29 @@ class PasswordResetRequestSerializer(serializers.Serializer):
         token = token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         
-        # Create reset link
-        frontend_url = settings.FRONTEND_URL if hasattr(settings, 'FRONTEND_URL') else 'http://localhost:5173'
+        # Get FRONTEND_URL with proper fallback
+        frontend_url = getattr(settings, 'FRONTEND_URL', None)
+        if not frontend_url:
+            logger.error("FRONTEND_URL not set in environment variables")
+            frontend_url = 'https://somasave.com'  # Default to production URL
+        
+        logger.info(f"Using FRONTEND_URL: {frontend_url}")
         reset_link = f"{frontend_url}/reset-password/{uid}/{token}"
         
         # Check if email is configured
         if not settings.EMAIL_HOST_PASSWORD:
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.warning(f"EMAIL_HOST_PASSWORD not set - cannot send email to {email}")
+            logger.error(f"EMAIL_HOST_PASSWORD not set - cannot send email to {email}")
+            logger.error(f"EMAIL_HOST: {getattr(settings, 'EMAIL_HOST', 'NOT SET')}")
+            logger.error(f"EMAIL_HOST_USER: {getattr(settings, 'EMAIL_HOST_USER', 'NOT SET')}")
+            logger.error(f"EMAIL_PORT: {getattr(settings, 'EMAIL_PORT', 'NOT SET')}")
             raise serializers.ValidationError(
                 "Email service is not configured. Please contact support at info@somasave.com or WhatsApp +256 763 200075"
             )
+        
+        logger.info(f"Email configuration check passed for {email}")
+        logger.info(f"EMAIL_HOST: {settings.EMAIL_HOST}")
+        logger.info(f"EMAIL_PORT: {settings.EMAIL_PORT}")
+        logger.info(f"EMAIL_HOST_USER: {settings.EMAIL_HOST_USER}")
         
         # Send email
         subject = 'SomaSave SACCO - Password Reset Request'
@@ -366,11 +380,15 @@ For assistance, contact us at info@somasave.com
             import time
             import socket
             
+            logger.info(f"Attempting to send password reset email to {email}")
+            
             max_retries = 2  # Reduced from 3
             retry_delay = 1  # Reduced from 2 seconds
             
             for attempt in range(max_retries):
                 try:
+                    logger.info(f"Email send attempt {attempt + 1} of {max_retries}")
+                    
                     # Create a fresh connection with shorter timeout to prevent gunicorn worker timeout
                     socket.setdefaulttimeout(15)  # Reduced from 60
                     
@@ -383,6 +401,8 @@ For assistance, contact us at info@somasave.com
                         use_tls=True,
                         timeout=15  # Reduced from 60
                     )
+                    
+                    logger.info(f"Connection created, sending to {email}")
                     
                     email_message = EmailMultiAlternatives(
                         subject=subject,
@@ -398,45 +418,53 @@ For assistance, contact us at info@somasave.com
                     # Send email
                     email_message.send(fail_silently=False)
                     
+                    logger.info(f"Password reset email sent successfully to {email}")
                     # If successful, break out of retry loop
                     break
                     
                 except Exception as retry_error:
+                    logger.error(f"Attempt {attempt + 1} failed: {str(retry_error)}")
                     if attempt < max_retries - 1:
                         # Wait before retrying
+                        logger.info(f"Waiting {retry_delay}s before retry...")
                         time.sleep(retry_delay)
                         continue
                     else:
                         # Last attempt failed, raise the error
+                        logger.error(f"All {max_retries} attempts failed")
                         raise retry_error
                         
         except Exception as e:
             # Log the error with full details
-            import logging
             import traceback
-            logger = logging.getLogger(__name__)
             logger.error(f"Failed to send password reset email to {email} after {max_retries} attempts: {str(e)}")
             logger.error(f"Full traceback: {traceback.format_exc()}")
+            logger.error(f"Email settings - HOST: {settings.EMAIL_HOST}, PORT: {settings.EMAIL_PORT}, USER: {settings.EMAIL_HOST_USER}")
+            logger.error(f"PASSWORD set: {bool(settings.EMAIL_HOST_PASSWORD)}")
             
             # Check if it's an authentication error
             error_msg = str(e).lower()
-            if 'authentication' in error_msg or 'username' in error_msg or 'password' in error_msg or '535' in error_msg:
+            if 'authentication' in error_msg or 'username' in error_msg or 'password' in error_msg or '535' in error_msg or '534' in error_msg:
                 logger.error("Email authentication failed - check EMAIL_HOST_PASSWORD in Railway env vars")
+                logger.error(f"This usually means: 1) Wrong password 2) Account locked 3) Less secure apps blocked")
                 raise serializers.ValidationError(
-                    "Email service authentication failed. Please contact support at info@somasave.com or WhatsApp +256 763 200075"
+                    "Email authentication failed. Please contact support at info@somasave.com or WhatsApp +256 763 200075"
                 )
             elif 'connection' in error_msg or 'timeout' in error_msg or 'timed out' in error_msg:
-                logger.error("Email connection/timeout error - SMTP server unreachable")
+                logger.error("Email connection/timeout error - SMTP server unreachable or Railway blocking port 587")
+                logger.error(f"This usually means: 1) Railway firewall blocking 2) SMTP server down 3) Network issues")
                 raise serializers.ValidationError(
                     "Unable to connect to email service. Please contact support at info@somasave.com or WhatsApp +256 763 200075 for password reset assistance."
                 )
             elif 'refused' in error_msg:
-                logger.error("Connection refused - SMTP port may be blocked")
+                logger.error("Connection refused - SMTP port 587 may be blocked by Railway")
+                logger.error(f"Consider using port 465 (SSL) instead of 587 (TLS)")
                 raise serializers.ValidationError(
                     "Email service connection refused. Please contact support at info@somasave.com or WhatsApp +256 763 200075"
                 )
             else:
                 logger.error(f"Unknown email error: {str(e)}")
+                logger.error(f"Error type: {type(e).__name__}")
                 raise serializers.ValidationError(
                     f"Unable to send password reset email. Please contact support at info@somasave.com or WhatsApp +256 763 200075"
                 )

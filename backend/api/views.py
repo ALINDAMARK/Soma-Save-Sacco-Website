@@ -511,3 +511,112 @@ class PasswordResetConfirmView(views.APIView):
             result = serializer.save()
             return Response(result, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class TestEmailConfigView(views.APIView):
+    """API view to test email configuration - for debugging only"""
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    
+    def get(self, request):
+        """Check email configuration without sending email"""
+        from django.conf import settings
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        
+        config_status = {
+            'EMAIL_HOST': getattr(settings, 'EMAIL_HOST', None),
+            'EMAIL_PORT': getattr(settings, 'EMAIL_PORT', None),
+            'EMAIL_HOST_USER': getattr(settings, 'EMAIL_HOST_USER', None),
+            'EMAIL_HOST_PASSWORD_SET': bool(getattr(settings, 'EMAIL_HOST_PASSWORD', None)),
+            'EMAIL_USE_TLS': getattr(settings, 'EMAIL_USE_TLS', None),
+            'DEFAULT_FROM_EMAIL': getattr(settings, 'DEFAULT_FROM_EMAIL', None),
+            'FRONTEND_URL': getattr(settings, 'FRONTEND_URL', None),
+            'DEBUG': settings.DEBUG,
+        }
+        
+        logger.info(f"Email configuration check: {config_status}")
+        
+        # Check for common issues
+        issues = []
+        if not config_status['EMAIL_HOST_PASSWORD_SET']:
+            issues.append("EMAIL_HOST_PASSWORD is not set")
+        if not config_status['FRONTEND_URL']:
+            issues.append("FRONTEND_URL is not set")
+        if config_status['EMAIL_PORT'] not in [587, 465, 25]:
+            issues.append(f"Unusual EMAIL_PORT: {config_status['EMAIL_PORT']}")
+        
+        return Response({
+            'status': 'ok' if not issues else 'warning',
+            'configuration': config_status,
+            'issues': issues,
+            'message': 'Email configuration loaded' if not issues else 'Email configuration has issues'
+        })
+    
+    def post(self, request):
+        """Send a test email to verify configuration"""
+        from django.conf import settings
+        from django.core.mail import EmailMultiAlternatives
+        from django.core.mail import get_connection
+        import logging
+        import socket
+        
+        logger = logging.getLogger(__name__)
+        
+        test_email = request.data.get('email', settings.EMAIL_HOST_USER)
+        
+        if not test_email:
+            return Response({
+                'status': 'error',
+                'message': 'No email address provided'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        logger.info(f"Attempting to send test email to {test_email}")
+        
+        try:
+            socket.setdefaulttimeout(15)
+            
+            connection = get_connection(
+                backend='django.core.mail.backends.smtp.EmailBackend',
+                host=settings.EMAIL_HOST,
+                port=settings.EMAIL_PORT,
+                username=settings.EMAIL_HOST_USER,
+                password=settings.EMAIL_HOST_PASSWORD,
+                use_tls=True,
+                timeout=15
+            )
+            
+            subject = 'SomaSave SACCO - Email Test'
+            text_message = 'This is a test email from SomaSave SACCO. If you received this, email configuration is working correctly.'
+            html_message = '<html><body><h2>Test Email</h2><p>This is a test email from SomaSave SACCO.</p><p>If you received this, email configuration is working correctly.</p></body></html>'
+            
+            email_message = EmailMultiAlternatives(
+                subject=subject,
+                body=text_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[test_email],
+                connection=connection
+            )
+            
+            email_message.attach_alternative(html_message, "text/html")
+            email_message.send(fail_silently=False)
+            
+            logger.info(f"Test email sent successfully to {test_email}")
+            
+            return Response({
+                'status': 'success',
+                'message': f'Test email sent successfully to {test_email}'
+            })
+            
+        except Exception as e:
+            logger.error(f"Failed to send test email: {str(e)}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            
+            return Response({
+                'status': 'error',
+                'message': f'Failed to send test email: {str(e)}',
+                'error_type': type(e).__name__
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
