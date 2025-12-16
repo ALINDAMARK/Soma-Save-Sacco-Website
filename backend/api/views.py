@@ -458,13 +458,11 @@ class DashboardStatsView(views.APIView):
         })
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class PasswordResetRequestView(views.APIView):
     """API view to request password reset"""
     permission_classes = [AllowAny]
-    
-    @method_decorator(csrf_exempt)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
+    authentication_classes = []  # No authentication required
     
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
@@ -474,13 +472,11 @@ class PasswordResetRequestView(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class PasswordResetConfirmView(views.APIView):
     """API view to confirm password reset"""
     permission_classes = [AllowAny]
-    
-    @method_decorator(csrf_exempt)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
+    authentication_classes = []  # No authentication required
     
     def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)

@@ -403,13 +403,29 @@ For assistance, contact us at info@somasave.com
                         raise retry_error
                         
         except Exception as e:
-            # Log the error but don't expose it to the user
+            # Log the error with full details
             import logging
+            import traceback
             logger = logging.getLogger(__name__)
             logger.error(f"Failed to send password reset email to {email} after {max_retries} attempts: {str(e)}")
-            raise serializers.ValidationError(
-                "Unable to send password reset email. Please try again later or contact support."
-            )
+            logger.error(f"Full traceback: {traceback.format_exc()}")
+            
+            # Check if it's an authentication error
+            error_msg = str(e).lower()
+            if 'authentication' in error_msg or 'username' in error_msg or 'password' in error_msg:
+                logger.error("Email authentication failed - check EMAIL_HOST_PASSWORD in Railway env vars")
+                raise serializers.ValidationError(
+                    "Email service configuration error. Please contact support."
+                )
+            elif 'connection' in error_msg or 'timeout' in error_msg:
+                logger.error("Email connection/timeout error - check network/SMTP settings")
+                raise serializers.ValidationError(
+                    "Unable to connect to email service. Please try again later."
+                )
+            else:
+                raise serializers.ValidationError(
+                    f"Unable to send password reset email: {str(e)}. Please contact support."
+                )
         
         return {'message': 'Password reset link has been sent to your email.'}
 
