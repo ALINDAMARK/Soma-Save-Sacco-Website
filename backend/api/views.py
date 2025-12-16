@@ -300,14 +300,18 @@ class LoginView(views.APIView):
                 'accounts': AccountSerializer(accounts, many=True).data
             })
             
-            # Explicitly set session cookie
+            # Set session cookie with production-ready settings
+            # Use environment variables to determine if we're in production
+            from django.conf import settings
+            is_production = not settings.DEBUG
+            
             response.set_cookie(
                 key='sessionid',
                 value=request.session.session_key,
                 max_age=86400,
                 httponly=True,
-                samesite='Lax',
-                secure=False,
+                samesite='None' if is_production else 'Lax',
+                secure=is_production,  # True in production (HTTPS)
                 domain=None
             )
             
@@ -329,9 +333,20 @@ class LogoutView(views.APIView):
         request.session.flush()
         
         response = Response({'message': 'Logout successful'})
-        # Delete cookies on the client side
-        response.delete_cookie('sessionid')
-        response.delete_cookie('csrftoken')
+        # Delete cookies with same settings as when they were set
+        from django.conf import settings
+        is_production = not settings.DEBUG
+        
+        response.delete_cookie(
+            'sessionid',
+            samesite='None' if is_production else 'Lax',
+            secure=is_production
+        )
+        response.delete_cookie(
+            'csrftoken',
+            samesite='None' if is_production else 'Lax',
+            secure=is_production
+        )
         return response
 
 

@@ -112,32 +112,17 @@ export default function Navbar() {
               </button>
               
               {isLoggedIn ? (
-                <>
-                  <Link to="/member-portal" className="hidden sm:block">
-                    <button className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-background-light dark:bg-background-dark border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 text-sm font-bold leading-normal tracking-[0.015em] hover:bg-gray-100 dark:hover:bg-gray-800 hover-scale transition-colors">
-                      <span className="truncate">Dashboard</span>
-                    </button>
-                  </Link>
-                  <button 
-                    onClick={handleLogout}
-                    className="hidden md:flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-red-600 text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-red-700 hover-scale transition-colors"
-                  >
-                    <span className="truncate">Logout</span>
+                <Link to="/member-portal" className="hidden sm:block">
+                  <button className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-primary text-gray-900 text-sm font-bold leading-normal tracking-[0.015em] hover:opacity-90 hover-glow transition-all">
+                    <span className="truncate">Dashboard</span>
                   </button>
-                </>
+                </Link>
               ) : (
-                <>
-                  <Link to="/login" className="hidden sm:block">
-                    <button className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-background-light dark:bg-background-dark border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 text-sm font-bold leading-normal tracking-[0.015em] hover:bg-gray-100 dark:hover:bg-gray-800 hover-scale transition-colors">
-                      <span className="truncate">Login</span>
-                    </button>
-                  </Link>
-                  <Link to="/register" className="hidden md:block">
-                    <button className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-primary text-gray-900 text-sm font-bold leading-normal tracking-[0.015em] hover:opacity-90 hover-glow transition-all">
-                      <span className="truncate">Register</span>
-                    </button>
-                  </Link>
-                </>
+                <Link to="/register" className="hidden md:block">
+                  <button className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-primary text-gray-900 text-sm font-bold leading-normal tracking-[0.015em] hover:opacity-90 hover-glow transition-all">
+                    <span className="truncate">Register</span>
+                  </button>
+                </Link>
               )}
 
               {/* Mobile Menu Button */}
