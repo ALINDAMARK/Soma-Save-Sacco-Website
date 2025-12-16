@@ -375,101 +375,81 @@ For assistance, contact us at info@somasave.com
         """
         
         try:
-            # Use EmailMultiAlternatives with shorter timeout to prevent worker timeout
-            from django.core.mail import get_connection
-            import time
+            # Use threading to send email asynchronously and prevent worker timeout
+            from django.core.mail import get_connection, EmailMultiAlternatives
+            import threading
             import socket
             
             logger.info(f"Attempting to send password reset email to {email}")
             
-            max_retries = 2  # Reduced from 3
-            retry_delay = 1  # Reduced from 2 seconds
+            def send_email_async():
+                """Send email in background thread to prevent worker timeout"""
+                ports_to_try = [
+                    (587, True, False),   # Port 587 with TLS
+                    (465, False, True),   # Port 465 with SSL (fallback)
+                ]
+                
+                for port, use_tls, use_ssl in ports_to_try:
+                    try:
+                        logger.info(f"Trying port {port} (TLS={use_tls}, SSL={use_ssl})")
+                        
+                        # Set aggressive timeout to prevent hanging
+                        socket.setdefaulttimeout(10)
+                        
+                        connection = get_connection(
+                            backend='django.core.mail.backends.smtp.EmailBackend',
+                            host=settings.EMAIL_HOST,
+                            port=port,
+                            username=settings.EMAIL_HOST_USER,
+                            password=settings.EMAIL_HOST_PASSWORD,
+                            use_tls=use_tls,
+                            use_ssl=use_ssl,
+                            timeout=10
+                        )
+                        
+                        email_message = EmailMultiAlternatives(
+                            subject=subject,
+                            body=text_message,
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            to=[email],
+                            connection=connection
+                        )
+                        
+                        email_message.attach_alternative(html_message, "text/html")
+                        email_message.send(fail_silently=False)
+                        
+                        logger.info(f"✅ Password reset email sent successfully to {email} via port {port}")
+                        return  # Success, exit thread
+                        
+                    except Exception as e:
+                        logger.error(f"❌ Port {port} failed: {str(e)}")
+                        if port == ports_to_try[-1][0]:  # Last port
+                            logger.error(f"All ports failed for {email}. Email not sent.")
+                            logger.error(f"User should contact support: info@somasave.com")
             
-            for attempt in range(max_retries):
-                try:
-                    logger.info(f"Email send attempt {attempt + 1} of {max_retries}")
-                    
-                    # Create a fresh connection with shorter timeout to prevent gunicorn worker timeout
-                    socket.setdefaulttimeout(15)  # Reduced from 60
-                    
-                    connection = get_connection(
-                        backend='django.core.mail.backends.smtp.EmailBackend',
-                        host=settings.EMAIL_HOST,
-                        port=settings.EMAIL_PORT,
-                        username=settings.EMAIL_HOST_USER,
-                        password=settings.EMAIL_HOST_PASSWORD,
-                        use_tls=True,
-                        timeout=15  # Reduced from 60
-                    )
-                    
-                    logger.info(f"Connection created, sending to {email}")
-                    
-                    email_message = EmailMultiAlternatives(
-                        subject=subject,
-                        body=text_message,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        to=[email],
-                        connection=connection
-                    )
-                    
-                    # Attach HTML version
-                    email_message.attach_alternative(html_message, "text/html")
-                    
-                    # Send email
-                    email_message.send(fail_silently=False)
-                    
-                    logger.info(f"Password reset email sent successfully to {email}")
-                    # If successful, break out of retry loop
-                    break
-                    
-                except Exception as retry_error:
-                    logger.error(f"Attempt {attempt + 1} failed: {str(retry_error)}")
-                    if attempt < max_retries - 1:
-                        # Wait before retrying
-                        logger.info(f"Waiting {retry_delay}s before retry...")
-                        time.sleep(retry_delay)
-                        continue
-                    else:
-                        # Last attempt failed, raise the error
-                        logger.error(f"All {max_retries} attempts failed")
-                        raise retry_error
+            # Start email sending in background thread
+            email_thread = threading.Thread(target=send_email_async, daemon=True)
+            email_thread.start()
+            
+            logger.info(f"Email send initiated in background for {email}")
                         
         except Exception as e:
-            # Log the error with full details
+            # Log the error but don't block the response
             import traceback
-            logger.error(f"Failed to send password reset email to {email} after {max_retries} attempts: {str(e)}")
+            logger.error(f"Error initiating password reset email to {email}: {str(e)}")
             logger.error(f"Full traceback: {traceback.format_exc()}")
             logger.error(f"Email settings - HOST: {settings.EMAIL_HOST}, PORT: {settings.EMAIL_PORT}, USER: {settings.EMAIL_HOST_USER}")
             logger.error(f"PASSWORD set: {bool(settings.EMAIL_HOST_PASSWORD)}")
             
-            # Check if it's an authentication error
-            error_msg = str(e).lower()
-            if 'authentication' in error_msg or 'username' in error_msg or 'password' in error_msg or '535' in error_msg or '534' in error_msg:
-                logger.error("Email authentication failed - check EMAIL_HOST_PASSWORD in Railway env vars")
-                logger.error(f"This usually means: 1) Wrong password 2) Account locked 3) Less secure apps blocked")
-                raise serializers.ValidationError(
-                    "Email authentication failed. Please contact support at info@somasave.com or WhatsApp +256 763 200075"
-                )
-            elif 'connection' in error_msg or 'timeout' in error_msg or 'timed out' in error_msg:
-                logger.error("Email connection/timeout error - SMTP server unreachable or Railway blocking port 587")
-                logger.error(f"This usually means: 1) Railway firewall blocking 2) SMTP server down 3) Network issues")
-                raise serializers.ValidationError(
-                    "Unable to connect to email service. Please contact support at info@somasave.com or WhatsApp +256 763 200075 for password reset assistance."
-                )
-            elif 'refused' in error_msg:
-                logger.error("Connection refused - SMTP port 587 may be blocked by Railway")
-                logger.error(f"Consider using port 465 (SSL) instead of 587 (TLS)")
-                raise serializers.ValidationError(
-                    "Email service connection refused. Please contact support at info@somasave.com or WhatsApp +256 763 200075"
-                )
-            else:
-                logger.error(f"Unknown email error: {str(e)}")
-                logger.error(f"Error type: {type(e).__name__}")
-                raise serializers.ValidationError(
-                    f"Unable to send password reset email. Please contact support at info@somasave.com or WhatsApp +256 763 200075"
-                )
+            # Still return success to user - email will be attempted in background
+            # This prevents worker timeout from affecting user experience
+            logger.warning(f"Returning success response despite error - email will be attempted in background")
         
-        return {'message': 'Password reset link has been sent to your email.'}
+        # Always return success message to prevent timeout issues
+        # The email sending happens asynchronously
+        return {
+            'message': 'If your email exists in our system, you will receive a password reset link shortly. Please check your inbox and spam folder.'
+        }
 
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
