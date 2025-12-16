@@ -15,10 +15,18 @@ export default function MemberPortal() {
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
   const [error, setError] = useState('');
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Fetch dashboard data on mount
   useEffect(() => {
     const fetchDashboardData = async () => {
+      // Check if user is logged in
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      if (!isLoggedIn) {
+        navigate('/login', { replace: true });
+        return;
+      }
+      
       try {
         setLoading(true);
         const data = await api.auth.getDashboardStats();
@@ -28,10 +36,10 @@ export default function MemberPortal() {
         console.error('Failed to fetch dashboard data:', err);
         setError('Failed to load dashboard data. Please try logging in again.');
         // If unauthorized, redirect to login
-        if (err.message.includes('authenticated')) {
+        if (err.message.includes('authenticated') || err.message.includes('401')) {
           localStorage.removeItem('isLoggedIn');
           localStorage.removeItem('userName');
-          navigate('/login');
+          navigate('/login', { replace: true });
         }
       } finally {
         setLoading(false);
@@ -39,6 +47,21 @@ export default function MemberPortal() {
     };
 
     fetchDashboardData();
+  }, [navigate]);
+  
+  // Check authentication when component becomes visible (e.g., back button)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        if (!isLoggedIn) {
+          navigate('/login', { replace: true });
+        }
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [navigate]);
 
   useEffect(() => {
@@ -75,14 +98,23 @@ export default function MemberPortal() {
   ];
 
   const handleLogout = async () => {
+    setIsLoggingOut(true);
+    
     try {
       await api.auth.logout();
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
+      // Ensure local storage is cleared
       localStorage.removeItem('isLoggedIn');
       localStorage.removeItem('userName');
-      navigate('/login');
+      
+      // Small delay for visual feedback
+      setTimeout(() => {
+        navigate('/login', { replace: true });
+        // Force reload to clear any cached data
+        window.location.reload();
+      }, 800);
     }
   };
 
@@ -122,6 +154,19 @@ export default function MemberPortal() {
 
   return (
     <>
+      {/* Logout Loading Overlay */}
+      {isLoggingOut && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-2xl text-center max-w-sm mx-4 animate-fadeInUp">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
+              <span className="material-symbols-outlined text-4xl text-primary animate-spin">logout</span>
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Logging Out...</h3>
+            <p className="text-gray-600 dark:text-gray-400">Please wait</p>
+          </div>
+        </div>
+      )}
+      
       <main className="flex-1 bg-background-light dark:bg-background-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex gap-6">

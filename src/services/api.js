@@ -85,16 +85,33 @@ const api = {
 
     logout: async () => {
       const csrftoken = getCookie('csrftoken');
-      const response = await fetch(`${API_BASE_URL}/auth/logout/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrftoken,
-        },
-        credentials: 'include',
-      });
-      
-      return response.json();
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/logout/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken,
+          },
+          credentials: 'include',
+        });
+        
+        // Clear all auth-related data immediately
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('userName');
+        
+        // Clear session cookie by setting it to expire
+        document.cookie = 'sessionid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'csrftoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        
+        return response.ok ? await response.json() : { success: true };
+      } catch (error) {
+        // Even if logout fails on server, clear local data
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('userName');
+        document.cookie = 'sessionid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'csrftoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        throw error;
+      }
     },
 
     getCurrentUser: async () => {
