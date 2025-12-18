@@ -56,16 +56,32 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     def update_profile(self, request):
         """Update current user's profile with Cloudinary image upload support"""
         import cloudinary.uploader
+        import logging
+        logger = logging.getLogger(__name__)
         
         user = request.user
-        data = request.data.copy()
+        logger.info(f"Profile update requested for user: {user.username}")
+        logger.info(f"Request data keys: {list(request.data.keys())}")
+        logger.info(f"Request FILES keys: {list(request.FILES.keys())}")
+        logger.info(f"Content-Type: {request.content_type}")
+        
+        # Use dict() for MultiValueDict to avoid copy() issues
+        data = {}
+        for key, value in request.data.items():
+            if key != 'profile_image':  # Skip file field
+                data[key] = value
+        
+        logger.info(f"Processing data fields: {list(data.keys())}")
         
         # Handle profile image upload to Cloudinary
         if 'profile_image' in request.FILES:
             try:
+                image_file = request.FILES['profile_image']
+                logger.info(f"Uploading image: {image_file.name}, size: {image_file.size} bytes")
+                
                 # Upload to Cloudinary
                 upload_result = cloudinary.uploader.upload(
-                    request.FILES['profile_image'],
+                    image_file,
                     folder='somasave/profiles',
                     public_id=f'user_{user.id}',
                     overwrite=True,
@@ -77,16 +93,22 @@ class CustomUserViewSet(viewsets.ModelViewSet):
                 )
                 # Store the secure URL
                 data['profile_image'] = upload_result['secure_url']
+                logger.info(f"Image uploaded successfully to: {upload_result['secure_url']}")
             except Exception as e:
+                logger.error(f"Image upload failed: {str(e)}", exc_info=True)
                 return Response(
                     {'error': f'Image upload failed: {str(e)}'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
         
+        logger.info(f"Updating profile with data: {data}")
         serializer = self.get_serializer(user, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
+            logger.info(f"Profile updated successfully for user: {user.username}")
             return Response(serializer.data)
+        
+        logger.error(f"Serializer validation errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['get', 'patch'], url_path='settings')

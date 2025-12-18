@@ -35,8 +35,15 @@ class CustomUserSerializer(serializers.ModelSerializer):
                   'national_id', 'date_of_birth', 'gender', 'next_of_kin', 'is_verified',
                   'student_id', 'university', 'university_name', 'course', 'course_name', 'year_of_study', 'profile_image',
                   'email_notifications', 'sms_notifications', 'transaction_alerts', 'loan_reminders',
-                  'marketing_emails', 'language', 'currency', 'two_factor_auth']
-        read_only_fields = ['id', 'is_verified', 'university_name', 'course_name']
+                  'marketing_emails', 'language', 'currency', 'two_factor_auth', 'date_joined']
+        read_only_fields = ['id', 'is_verified', 'university_name', 'course_name', 'date_joined', 'username']
+        extra_kwargs = {
+            'profile_image': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'first_name': {'required': False},
+            'last_name': {'required': False},
+            'email': {'required': False},
+            'phone_number': {'required': False},
+        }
 
 
 class UserSettingsSerializer(serializers.ModelSerializer):
