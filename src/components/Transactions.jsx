@@ -226,4 +226,4 @@ export default function Transactions({ user, recent_transactions }) {
     </div>
   );
 }
-// 
+// End of Transactions.jsx
