@@ -7,7 +7,7 @@
   "background_color": "#ffffff",
   "theme_color": "#00FF00",
   "orientation": "portrait-primary",
-  "scope": "/member-portal",
+  "scope": "/",
   "icons": [
     {
       "src": "/icon-180x180.png",

@@ -62,22 +62,32 @@ const PWAInstallPrompt = forwardRef(({ showOnLogin = false }, ref) => {
   }, [showOnLogin]);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-
-    // Show the install prompt
-    deferredPrompt.prompt();
-
-    // Wait for the user to respond
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log(`User response to install prompt: ${outcome}`);
-
-    if (outcome === 'accepted') {
-      console.log('PWA installation accepted');
+    if (!deferredPrompt) {
+      console.log('Install prompt not available');
+      // Show a message to the user
+      alert('Installation is not available. Please make sure you are using a supported browser (Chrome, Edge, Samsung Internet) and the app is not already installed.');
+      return;
     }
 
-    // Clear the prompt
-    setDeferredPrompt(null);
-    setShowPrompt(false);
+    try {
+      // Show the install prompt
+      deferredPrompt.prompt();
+
+      // Wait for the user to respond
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User response to install prompt: ${outcome}`);
+
+      if (outcome === 'accepted') {
+        console.log('PWA installation accepted');
+      }
+
+      // Clear the prompt
+      setDeferredPrompt(null);
+      setShowPrompt(false);
+    } catch (error) {
+      console.error('Error during installation:', error);
+      alert('Installation failed. Please try again.');
+    }
   };
 
   const handleDismiss = () => {
@@ -180,15 +190,24 @@ const PWAInstallPrompt = forwardRef(({ showOnLogin = false }, ref) => {
             </div>
           ) : (
             /* Android/Chrome Button */
-            <button
-              onClick={handleInstallClick}
-              className="w-full py-4 rounded-xl bg-gradient-to-r from-primary to-green-400 text-gray-900 font-bold text-base hover:opacity-90 transition-all shadow-lg mb-3"
-            >
-              <span className="flex items-center justify-center gap-2">
-                <span className="material-symbols-outlined">download</span>
-                Install App
-              </span>
-            </button>
+            deferredPrompt ? (
+              <button
+                onClick={handleInstallClick}
+                className="w-full py-4 rounded-xl bg-gradient-to-r from-primary to-green-400 text-gray-900 font-bold text-base hover:opacity-90 transition-all shadow-lg mb-3"
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <span className="material-symbols-outlined">download</span>
+                  Install App
+                </span>
+              </button>
+            ) : (
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 mb-3">
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  <span className="material-symbols-outlined text-yellow-600 text-lg align-middle mr-1">info</span>
+                  <strong>Installation not available:</strong> Make sure you're using Chrome, Edge, or Samsung Internet browser and the app is not already installed.
+                </p>
+              </div>
+            )
           )}
 
           {/* Action Buttons */}
