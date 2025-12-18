@@ -83,7 +83,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['post'], url_path='change-password')
     def change_password(self, request):
-        """Change user password"""
+        """Change user password with enhanced validation"""
         user = request.user
         current_password = request.data.get('current_password')
         new_password = request.data.get('new_password')
@@ -108,11 +108,212 @@ class CustomUserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        # Validate password doesn't match current
+        if user.check_password(new_password):
+            return Response(
+                {'error': 'New password must be different from current password'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Additional password strength validations
+        import re
+        if not re.search(r'[A-Za-z]', new_password):
+            return Response(
+                {'error': 'Password must contain at least one letter'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not re.search(r'\d', new_password):
+            return Response(
+                {'error': 'Password must contain at least one number'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         # Set new password
         user.set_password(new_password)
         user.save()
         
+        # Log password change activity
+        LoginActivity.objects.create(
+            user=user,
+            ip_address=request.META.get('REMOTE_ADDR', ''),
+            user_agent=request.META.get('HTTP_USER_AGENT', ''),
+            login_successful=True,
+            notes='Password changed successfully'
+        )
+        
         return Response({'message': 'Password changed successfully'})
+    
+    @action(detail=False, methods=['post'], url_path='enable-2fa')
+    def enable_2fa(self, request):
+        """Enable two-factor authentication and send OTP"""
+        user = request.user
+        
+        if user.two_factor_auth:
+            return Response(
+                {'error': 'Two-factor authentication is already enabled'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Generate and send OTP
+        import random
+        from django.utils import timezone
+        from django.core.mail import send_mail
+        from django.conf import settings
+        
+        otp = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+        user.otp_code = otp
+        user.otp_created_at = timezone.now()
+        user.save()
+        
+        # Send OTP via email
+        try:
+            send_mail(
+                subject='SomaSave SACCO - Enable 2FA Verification Code',
+                message=f'Your verification code is: {otp}\n\nThis code will expire in 10 minutes.\n\nIf you did not request this, please ignore this email.',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to send OTP: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+        return Response({
+            'message': 'OTP sent to your email',
+            'email': user.email
+        })
+    
+    @action(detail=False, methods=['post'], url_path='verify-2fa')
+    def verify_2fa(self, request):
+        """Verify OTP and enable 2FA"""
+        user = request.user
+        otp = request.data.get('otp')
+        
+        if not otp:
+            return Response(
+                {'error': 'OTP is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not user.otp_code or not user.otp_created_at:
+            return Response(
+                {'error': 'No OTP found. Please request a new one.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if OTP is expired (10 minutes)
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        if timezone.now() - user.otp_created_at > timedelta(minutes=10):
+            user.otp_code = None
+            user.otp_created_at = None
+            user.save()
+            return Response(
+                {'error': 'OTP has expired. Please request a new one.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Verify OTP
+        if user.otp_code != otp:
+            return Response(
+                {'error': 'Invalid OTP'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Enable 2FA
+        user.two_factor_auth = True
+        user.otp_code = None
+        user.otp_created_at = None
+        user.save()
+        
+        return Response({
+            'message': 'Two-factor authentication enabled successfully',
+            'two_factor_auth': True
+        })
+    
+    @action(detail=False, methods=['post'], url_path='disable-2fa')
+    def disable_2fa(self, request):
+        """Disable two-factor authentication"""
+        user = request.user
+        password = request.data.get('password')
+        
+        if not password:
+            return Response(
+                {'error': 'Password is required to disable 2FA'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Verify password
+        if not user.check_password(password):
+            return Response(
+                {'error': 'Incorrect password'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Disable 2FA
+        user.two_factor_auth = False
+        user.otp_code = None
+        user.otp_created_at = None
+        user.save()
+        
+        return Response({
+            'message': 'Two-factor authentication disabled successfully',
+            'two_factor_auth': False
+        })
+    
+    @action(detail=False, methods=['post'], url_path='send-login-otp')
+    def send_login_otp(self, request):
+        """Send OTP for login 2FA (public endpoint)"""
+        user_id = request.data.get('user_id')
+        
+        if not user_id:
+            return Response(
+                {'error': 'User ID is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return Response(
+                {'error': 'User not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Generate and send OTP
+        import random
+        from django.utils import timezone
+        from django.core.mail import send_mail
+        from django.conf import settings
+        
+        otp = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+        user.otp_code = otp
+        user.otp_created_at = timezone.now()
+        user.save()
+        
+        # Send OTP via email
+        try:
+            send_mail(
+                subject='SomaSave SACCO - Login Verification Code',
+                message=f'Your login verification code is: {otp}\n\nThis code will expire in 10 minutes.\n\nIf you did not attempt to log in, please secure your account immediately.',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to send OTP: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+        return Response({
+            'message': 'OTP sent to your email',
+            'email': user.email
+        })
 
 
 class AccountViewSet(viewsets.ModelViewSet):
@@ -281,6 +482,78 @@ class LoginView(views.APIView):
                 pass
         
         if user is not None:
+            # Check if 2FA is enabled
+            if user.two_factor_auth:
+                # Check if OTP is provided
+                otp = request.data.get('otp')
+                
+                if not otp:
+                    # OTP not provided, need to send OTP
+                    import random
+                    from django.utils import timezone
+                    from django.core.mail import send_mail
+                    from django.conf import settings
+                    
+                    otp_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+                    user.otp_code = otp_code
+                    user.otp_created_at = timezone.now()
+                    user.save()
+                    
+                    # Send OTP via email
+                    try:
+                        send_mail(
+                            subject='SomaSave SACCO - Login Verification Code',
+                            message=f'Your login verification code is: {otp_code}\n\nThis code will expire in 10 minutes.\n\nIf you did not attempt to log in, please secure your account immediately.',
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            recipient_list=[user.email],
+                            fail_silently=False,
+                        )
+                    except Exception as e:
+                        return Response(
+                            {'error': f'Failed to send OTP: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                        )
+                    
+                    return Response({
+                        'requires_2fa': True,
+                        'user_id': user.id,
+                        'message': 'OTP sent to your email',
+                        'email': user.email
+                    }, status=status.HTTP_200_OK)
+                
+                # OTP provided, verify it
+                if not user.otp_code or not user.otp_created_at:
+                    return Response(
+                        {'error': 'No OTP found. Please request a new one.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
+                # Check if OTP is expired (10 minutes)
+                from django.utils import timezone
+                from datetime import timedelta
+                
+                if timezone.now() - user.otp_created_at > timedelta(minutes=10):
+                    user.otp_code = None
+                    user.otp_created_at = None
+                    user.save()
+                    return Response(
+                        {'error': 'OTP has expired. Please request a new one.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
+                # Verify OTP
+                if user.otp_code != otp:
+                    return Response(
+                        {'error': 'Invalid OTP'},
+                        status=status.HTTP_401_UNAUTHORIZED
+                    )
+                
+                # Clear OTP after successful verification
+                user.otp_code = None
+                user.otp_created_at = None
+                user.save()
+            
+            # Proceed with login
             login(request, user)
             
             # Debug: Check session after login
@@ -297,6 +570,14 @@ class LoginView(views.APIView):
             
             # Get user's accounts
             accounts = Account.objects.filter(user=user)
+            
+            # Log successful login
+            LoginActivity.objects.create(
+                user=user,
+                ip_address=request.META.get('REMOTE_ADDR', ''),
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                login_successful=True
+            )
             
             response = Response({
                 'message': 'Login successful',

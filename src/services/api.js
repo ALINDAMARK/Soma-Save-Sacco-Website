@@ -42,14 +42,19 @@ const api = {
       return data;
     },
 
-    login: async (identifier, password) => {
+    login: async (identifier, password, otp = null) => {
+      const body = { identifier, password };
+      if (otp) {
+        body.otp = otp;
+      }
+      
       const response = await fetch(`${API_BASE_URL}/auth/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ identifier, password }),
+        body: JSON.stringify(body),
       });
       
       if (!response.ok) {
@@ -361,6 +366,86 @@ const api = {
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Failed to change password');
+      }
+      
+      return response.json();
+    },
+  },
+
+  // Two-Factor Authentication
+  twoFactorAuth: {
+    enable: async () => {
+      const csrftoken = getCookie('csrftoken');
+      const response = await fetch(`${API_BASE_URL}/users/enable-2fa/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        },
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to enable 2FA');
+      }
+      
+      return response.json();
+    },
+
+    verify: async (otp) => {
+      const csrftoken = getCookie('csrftoken');
+      const response = await fetch(`${API_BASE_URL}/users/verify-2fa/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        },
+        credentials: 'include',
+        body: JSON.stringify({ otp }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to verify OTP');
+      }
+      
+      return response.json();
+    },
+
+    disable: async (password) => {
+      const csrftoken = getCookie('csrftoken');
+      const response = await fetch(`${API_BASE_URL}/users/disable-2fa/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        },
+        credentials: 'include',
+        body: JSON.stringify({ password }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to disable 2FA');
+      }
+      
+      return response.json();
+    },
+
+    sendLoginOtp: async (userId) => {
+      const response = await fetch(`${API_BASE_URL}/users/send-login-otp/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ user_id: userId }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to send OTP');
       }
       
       return response.json();

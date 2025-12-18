@@ -26,6 +26,14 @@ export default function Settings({ user }) {
     confirmPassword: ''
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
+  
+  // 2FA state
+  const [show2FAModal, setShow2FAModal] = useState(false);
+  const [twoFAMode, setTwoFAMode] = useState(''); // 'enable' or 'disable'
+  const [otpInput, setOtpInput] = useState('');
+  const [disablePassword, setDisablePassword] = useState('');
+  const [twoFALoading, setTwoFALoading] = useState(false);
+  const [twoFAStep, setTwoFAStep] = useState(1); // 1: initial, 2: OTP entry
 
   // Load user settings on component mount
   useEffect(() => {
@@ -57,6 +65,22 @@ export default function Settings({ user }) {
   };
 
   const handleToggle = (setting) => {
+    // Special handling for 2FA - requires OTP verification
+    if (setting === 'twoFactorAuth') {
+      if (settings.twoFactorAuth) {
+        // Disabling 2FA - show password modal
+        setTwoFAMode('disable');
+        setShow2FAModal(true);
+        setTwoFAStep(1);
+      } else {
+        // Enabling 2FA - send OTP
+        setTwoFAMode('enable');
+        setShow2FAModal(true);
+        setTwoFAStep(1);
+      }
+      return;
+    }
+    
     setSettings(prev => ({
       ...prev,
       [setting]: !prev[setting]
@@ -125,6 +149,17 @@ export default function Settings({ user }) {
       return;
     }
     
+    // Check for letter and number
+    if (!/[A-Za-z]/.test(passwordData.newPassword)) {
+      setMessage({ type: 'error', text: 'Password must contain at least one letter' });
+      return;
+    }
+    
+    if (!/\d/.test(passwordData.newPassword)) {
+      setMessage({ type: 'error', text: 'Password must contain at least one number' });
+      return;
+    }
+    
     try {
       setPasswordLoading(true);
       setMessage({ type: '', text: '' });
@@ -146,6 +181,98 @@ export default function Settings({ user }) {
       setMessage({ type: 'error', text: err.message || 'Failed to change password' });
     } finally {
       setPasswordLoading(false);
+    }
+  };
+
+  const handleEnable2FA = async () => {
+    try {
+      setTwoFALoading(true);
+      setMessage({ type: '', text: '' });
+      
+      const response = await api.twoFactorAuth.enable();
+      
+      setMessage({ type: 'success', text: response.message || 'OTP sent to your email' });
+      setTwoFAStep(2); // Move to OTP entry step
+    } catch (err) {
+      console.error('Failed to enable 2FA:', err);
+      setMessage({ type: 'error', text: err.message || 'Failed to enable 2FA' });
+      setShow2FAModal(false);
+    } finally {
+      setTwoFALoading(false);
+    }
+  };
+
+  const handleVerify2FA = async () => {
+    if (!otpInput || otpInput.length !== 6) {
+      setMessage({ type: 'error', text: 'Please enter a valid 6-digit OTP' });
+      return;
+    }
+    
+    try {
+      setTwoFALoading(true);
+      setMessage({ type: '', text: '' });
+      
+      const response = await api.twoFactorAuth.verify(otpInput);
+      
+      // Update local settings
+      setSettings(prev => ({
+        ...prev,
+        twoFactorAuth: true
+      }));
+      
+      setMessage({ type: 'success', text: response.message || '2FA enabled successfully!' });
+      setShow2FAModal(false);
+      setOtpInput('');
+      setTwoFAStep(1);
+      
+      // Reload settings to ensure sync
+      await loadUserSettings();
+      
+      setTimeout(() => {
+        setMessage({ type: '', text: '' });
+      }, 3000);
+    } catch (err) {
+      console.error('Failed to verify OTP:', err);
+      setMessage({ type: 'error', text: err.message || 'Failed to verify OTP' });
+    } finally {
+      setTwoFALoading(false);
+    }
+  };
+
+  const handleDisable2FA = async () => {
+    if (!disablePassword) {
+      setMessage({ type: 'error', text: 'Password is required to disable 2FA' });
+      return;
+    }
+    
+    try {
+      setTwoFALoading(true);
+      setMessage({ type: '', text: '' });
+      
+      const response = await api.twoFactorAuth.disable(disablePassword);
+      
+      // Update local settings
+      setSettings(prev => ({
+        ...prev,
+        twoFactorAuth: false
+      }));
+      
+      setMessage({ type: 'success', text: response.message || '2FA disabled successfully!' });
+      setShow2FAModal(false);
+      setDisablePassword('');
+      setTwoFAStep(1);
+      
+      // Reload settings to ensure sync
+      await loadUserSettings();
+      
+      setTimeout(() => {
+        setMessage({ type: '', text: '' });
+      }, 3000);
+    } catch (err) {
+      console.error('Failed to disable 2FA:', err);
+      setMessage({ type: 'error', text: err.message || 'Failed to disable 2FA' });
+    } finally {
+      setTwoFALoading(false);
     }
   };
 
@@ -490,6 +617,9 @@ export default function Settings({ user }) {
                   className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:border-primary"
                   placeholder="Enter new password"
                 />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Must be 8+ characters with letters and numbers
+                </p>
               </div>
 
               <div>
@@ -523,6 +653,150 @@ export default function Settings({ user }) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 2FA Modal */}
+      {show2FAModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full p-8 animate-fadeInUp">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {twoFAMode === 'enable' ? 'Enable' : 'Disable'} Two-Factor Authentication
+              </h3>
+              <button
+                onClick={() => {
+                  setShow2FAModal(false);
+                  setOtpInput('');
+                  setDisablePassword('');
+                  setTwoFAStep(1);
+                }}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            {twoFAMode === 'enable' && (
+              <>
+                {twoFAStep === 1 && (
+                  <div className="space-y-4">
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Two-factor authentication adds an extra layer of security to your account. 
+                      When enabled, you'll need to enter a code sent to your email whenever you log in.
+                    </p>
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                      <div className="flex gap-3">
+                        <span className="material-symbols-outlined text-blue-600">info</span>
+                        <div>
+                          <p className="font-semibold text-blue-900 dark:text-blue-300">Important</p>
+                          <p className="text-sm text-blue-700 dark:text-blue-400 mt-1">
+                            Make sure you have access to your email ({user?.email}) before enabling 2FA.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleEnable2FA}
+                      disabled={twoFALoading}
+                      className="w-full px-4 py-3 rounded-lg bg-primary text-gray-900 font-semibold hover:opacity-90 transition-all disabled:opacity-50"
+                    >
+                      {twoFALoading ? 'Sending OTP...' : 'Send Verification Code'}
+                    </button>
+                  </div>
+                )}
+
+                {twoFAStep === 2 && (
+                  <div className="space-y-4">
+                    <p className="text-gray-600 dark:text-gray-400">
+                      We've sent a 6-digit verification code to your email. Enter it below to enable 2FA.
+                    </p>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Verification Code
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={6}
+                        value={otpInput}
+                        onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
+                        className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-center text-2xl tracking-widest focus:outline-none focus:border-primary"
+                        placeholder="000000"
+                      />
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 text-center">
+                        Code expires in 10 minutes
+                      </p>
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleEnable2FA}
+                        disabled={twoFALoading}
+                        className="flex-1 px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
+                      >
+                        {twoFALoading ? 'Resending...' : 'Resend Code'}
+                      </button>
+                      <button
+                        onClick={handleVerify2FA}
+                        disabled={twoFALoading || otpInput.length !== 6}
+                        className="flex-1 px-4 py-3 rounded-lg bg-primary text-gray-900 font-semibold hover:opacity-90 transition-all disabled:opacity-50"
+                      >
+                        {twoFALoading ? 'Verifying...' : 'Verify & Enable'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {twoFAMode === 'disable' && (
+              <div className="space-y-4">
+                <p className="text-gray-600 dark:text-gray-400">
+                  Enter your password to disable two-factor authentication.
+                </p>
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                  <div className="flex gap-3">
+                    <span className="material-symbols-outlined text-yellow-600">warning</span>
+                    <div>
+                      <p className="font-semibold text-yellow-900 dark:text-yellow-300">Warning</p>
+                      <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
+                        Disabling 2FA will make your account less secure.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    value={disablePassword}
+                    onChange={(e) => setDisablePassword(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:border-primary"
+                    placeholder="Enter your password"
+                  />
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => {
+                      setShow2FAModal(false);
+                      setDisablePassword('');
+                    }}
+                    className="flex-1 px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDisable2FA}
+                    disabled={twoFALoading || !disablePassword}
+                    className="flex-1 px-4 py-3 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-all disabled:opacity-50"
+                  >
+                    {twoFALoading ? 'Disabling...' : 'Disable 2FA'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
