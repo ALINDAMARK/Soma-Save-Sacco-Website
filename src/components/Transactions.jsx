@@ -226,3 +226,4 @@ export default function Transactions({ user, recent_transactions }) {
     </div>
   );
 }
+// 
