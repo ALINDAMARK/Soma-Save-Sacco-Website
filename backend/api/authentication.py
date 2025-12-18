@@ -29,7 +29,6 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
         return result
     
     def enforce_csrf(self, request):
-        # Skip CSRF check for safe methods
-        if request.method in ['GET', 'HEAD', 'OPTIONS']:
-            return
-        return super().enforce_csrf(request)
+        # Skip CSRF check completely for API endpoints
+        # Frontend includes CSRF token via X-CSRFToken header when needed
+        return

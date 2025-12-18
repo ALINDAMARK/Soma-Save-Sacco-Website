@@ -60,10 +60,15 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         logger = logging.getLogger(__name__)
         
         user = request.user
-        logger.info(f"Profile update requested for user: {user.username}")
+        logger.info(f"=== Profile Update Debug ===")
+        logger.info(f"User: {user.username}")
+        logger.info(f"Is authenticated: {user.is_authenticated}")
+        logger.info(f"Request method: {request.method}")
+        logger.info(f"Content-Type: {request.content_type}")
+        logger.info(f"CSRF token in headers: {request.META.get('HTTP_X_CSRFTOKEN', 'NOT FOUND')}")
         logger.info(f"Request data keys: {list(request.data.keys())}")
         logger.info(f"Request FILES keys: {list(request.FILES.keys())}")
-        logger.info(f"Content-Type: {request.content_type}")
+        logger.info(f"=============================")
         
         # Use dict() for MultiValueDict to avoid copy() issues
         data = {}
