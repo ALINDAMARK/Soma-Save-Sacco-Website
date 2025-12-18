@@ -41,18 +41,18 @@ const PWAInstallPrompt = forwardRef(({ showOnLogin = false }, ref) => {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      if (showOnLogin) {
-        setShowPrompt(true);
-      }
+      // Always show the prompt when we capture the event
+      setShowPrompt(true);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // Show on login if prop is true
+    // Show on login or manual trigger regardless of browser
     if (showOnLogin && !isInStandaloneMode) {
-      setTimeout(() => setShowPrompt(true), 2000); // Show after 2 seconds on login
-    } else if (iOS && !isInStandaloneMode && !dismissed) {
-      // For iOS, show manual instructions if not installed (regular visit)
+      // Show after 2 seconds on login for all browsers
+      setTimeout(() => setShowPrompt(true), 2000);
+    } else if (!isInStandaloneMode && !dismissed && !showOnLogin) {
+      // For regular visits, show after 3 seconds for all browsers
       setTimeout(() => setShowPrompt(true), 3000);
     }
 
@@ -63,9 +63,7 @@ const PWAInstallPrompt = forwardRef(({ showOnLogin = false }, ref) => {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
-      console.log('Install prompt not available');
-      // Show a message to the user
-      alert('Installation is not available. Please make sure you are using a supported browser (Chrome, Edge, Samsung Internet) and the app is not already installed.');
+      console.log('Native install prompt not available');
       return;
     }
 
@@ -86,7 +84,6 @@ const PWAInstallPrompt = forwardRef(({ showOnLogin = false }, ref) => {
       setShowPrompt(false);
     } catch (error) {
       console.error('Error during installation:', error);
-      alert('Installation failed. Please try again.');
     }
   };
 
@@ -171,7 +168,7 @@ const PWAInstallPrompt = forwardRef(({ showOnLogin = false }, ref) => {
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6">
               <p className="font-semibold text-gray-900 dark:text-white text-sm mb-3 flex items-center gap-2">
                 <span className="material-symbols-outlined text-blue-600">info</span>
-                How to Install on iOS:
+                How to Install on iOS Safari:
               </p>
               <ol className="space-y-2 text-xs text-gray-700 dark:text-gray-300">
                 <li className="flex items-start gap-2">
@@ -188,26 +185,57 @@ const PWAInstallPrompt = forwardRef(({ showOnLogin = false }, ref) => {
                 </li>
               </ol>
             </div>
+          ) : deferredPrompt ? (
+            /* Android/Chrome Button - Native Install */
+            <button
+              onClick={handleInstallClick}
+              className="w-full py-4 rounded-xl bg-gradient-to-r from-primary to-green-400 text-gray-900 font-bold text-base hover:opacity-90 transition-all shadow-lg mb-3"
+            >
+              <span className="flex items-center justify-center gap-2">
+                <span className="material-symbols-outlined">download</span>
+                Install App
+              </span>
+            </button>
           ) : (
-            /* Android/Chrome Button */
-            deferredPrompt ? (
-              <button
-                onClick={handleInstallClick}
-                className="w-full py-4 rounded-xl bg-gradient-to-r from-primary to-green-400 text-gray-900 font-bold text-base hover:opacity-90 transition-all shadow-lg mb-3"
-              >
-                <span className="flex items-center justify-center gap-2">
-                  <span className="material-symbols-outlined">download</span>
-                  Install App
-                </span>
-              </button>
-            ) : (
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 mb-3">
-                <p className="text-sm text-gray-700 dark:text-gray-300">
-                  <span className="material-symbols-outlined text-yellow-600 text-lg align-middle mr-1">info</span>
-                  <strong>Installation not available:</strong> Make sure you're using Chrome, Edge, or Samsung Internet browser and the app is not already installed.
+            /* Fallback Instructions for Other Browsers */
+            <div className="space-y-3 mb-3">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                <p className="font-semibold text-gray-900 dark:text-white text-sm mb-3 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-blue-600">info</span>
+                  How to Install:
                 </p>
+                
+                {/* Chrome/Edge Instructions */}
+                <div className="mb-3">
+                  <p className="font-semibold text-xs text-gray-900 dark:text-white mb-1">Chrome/Edge/Opera:</p>
+                  <ol className="space-y-1 text-xs text-gray-700 dark:text-gray-300 ml-3">
+                    <li>1. Click the menu (⋮) in the top right</li>
+                    <li>2. Select "Install SomaSave" or "Install app"</li>
+                    <li>3. Click "Install" in the popup</li>
+                  </ol>
+                </div>
+
+                {/* Firefox Instructions */}
+                <div className="mb-3">
+                  <p className="font-semibold text-xs text-gray-900 dark:text-white mb-1">Firefox:</p>
+                  <ol className="space-y-1 text-xs text-gray-700 dark:text-gray-300 ml-3">
+                    <li>1. Look for the install icon in the address bar</li>
+                    <li>2. Or add this page to bookmarks</li>
+                    <li>3. For mobile: Menu → "Install" or "Add to Home screen"</li>
+                  </ol>
+                </div>
+
+                {/* Android Instructions */}
+                <div>
+                  <p className="font-semibold text-xs text-gray-900 dark:text-white mb-1">Android Browser:</p>
+                  <ol className="space-y-1 text-xs text-gray-700 dark:text-gray-300 ml-3">
+                    <li>1. Tap the menu (⋮) button</li>
+                    <li>2. Select "Add to Home screen"</li>
+                    <li>3. Tap "Add"</li>
+                  </ol>
+                </div>
               </div>
-            )
+            </div>
           )}
 
           {/* Action Buttons */}
