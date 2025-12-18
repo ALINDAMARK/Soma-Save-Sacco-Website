@@ -133,18 +133,21 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         user.set_password(new_password)
         user.save()
         
-        # Log password change activity
-        LoginActivity.objects.create(
-            user=user,
-            ip_address=request.META.get('REMOTE_ADDR', ''),
-            user_agent=request.META.get('HTTP_USER_AGENT', ''),
-            login_successful=True,
-            notes='Password changed successfully'
-        )
+        # Log password change activity (optional - create a simple log entry)
+        try:
+            LoginActivity.objects.create(
+                user=user,
+                ip_address=request.META.get('REMOTE_ADDR', '127.0.0.1'),
+                location='Password Change',
+                device=request.META.get('HTTP_USER_AGENT', 'Unknown')[:255]
+            )
+        except Exception as e:
+            # Don't fail password change if logging fails
+            print(f"Failed to log activity: {e}")
         
         return Response({'message': 'Password changed successfully'})
     
-    @action(detail=False, methods=['post'], url_path='enable-2fa')
+    @action(detail=False, methods=['post'], url_path='enable-2fa', permission_classes=[IsAuthenticated])
     def enable_2fa(self, request):
         """Enable two-factor authentication and send OTP"""
         user = request.user
@@ -168,6 +171,13 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         
         # Send OTP via email
         try:
+            print(f"=== Sending 2FA OTP Email ===")
+            print(f"To: {user.email}")
+            print(f"OTP: {otp}")
+            print(f"From: {settings.DEFAULT_FROM_EMAIL}")
+            print(f"Email Host: {settings.EMAIL_HOST}")
+            print(f"============================")
+            
             send_mail(
                 subject='SomaSave SACCO - Enable 2FA Verification Code',
                 message=f'Your verification code is: {otp}\n\nThis code will expire in 10 minutes.\n\nIf you did not request this, please ignore this email.',
@@ -175,7 +185,12 @@ class CustomUserViewSet(viewsets.ModelViewSet):
                 recipient_list=[user.email],
                 fail_silently=False,
             )
+            
+            print(f"✅ Email sent successfully to {user.email}")
         except Exception as e:
+            print(f"❌ Failed to send email: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return Response(
                 {'error': f'Failed to send OTP: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -186,7 +201,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
             'email': user.email
         })
     
-    @action(detail=False, methods=['post'], url_path='verify-2fa')
+    @action(detail=False, methods=['post'], url_path='verify-2fa', permission_classes=[IsAuthenticated])
     def verify_2fa(self, request):
         """Verify OTP and enable 2FA"""
         user = request.user
@@ -235,7 +250,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
             'two_factor_auth': True
         })
     
-    @action(detail=False, methods=['post'], url_path='disable-2fa')
+    @action(detail=False, methods=['post'], url_path='disable-2fa', permission_classes=[IsAuthenticated])
     def disable_2fa(self, request):
         """Disable two-factor authentication"""
         user = request.user
@@ -265,7 +280,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
             'two_factor_auth': False
         })
     
-    @action(detail=False, methods=['post'], url_path='send-login-otp')
+    @action(detail=False, methods=['post'], url_path='send-login-otp', permission_classes=[AllowAny])
     def send_login_otp(self, request):
         """Send OTP for login 2FA (public endpoint)"""
         user_id = request.data.get('user_id')
@@ -297,6 +312,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         
         # Send OTP via email
         try:
+            print(f"=== Sending Login OTP Email ===\nTo: {user.email}\nOTP: {otp}")
             send_mail(
                 subject='SomaSave SACCO - Login Verification Code',
                 message=f'Your login verification code is: {otp}\n\nThis code will expire in 10 minutes.\n\nIf you did not attempt to log in, please secure your account immediately.',
@@ -304,7 +320,9 @@ class CustomUserViewSet(viewsets.ModelViewSet):
                 recipient_list=[user.email],
                 fail_silently=False,
             )
+            print(f"✅ Login OTP sent successfully")
         except Exception as e:
+            print(f"❌ Failed to send login OTP: {str(e)}")
             return Response(
                 {'error': f'Failed to send OTP: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -501,6 +519,7 @@ class LoginView(views.APIView):
                     
                     # Send OTP via email
                     try:
+                        print(f"=== Sending 2FA Login OTP ===\nTo: {user.email}\nOTP: {otp_code}")
                         send_mail(
                             subject='SomaSave SACCO - Login Verification Code',
                             message=f'Your login verification code is: {otp_code}\n\nThis code will expire in 10 minutes.\n\nIf you did not attempt to log in, please secure your account immediately.',
@@ -508,7 +527,9 @@ class LoginView(views.APIView):
                             recipient_list=[user.email],
                             fail_silently=False,
                         )
+                        print(f"✅ 2FA Login OTP sent successfully")
                     except Exception as e:
+                        print(f"❌ Failed to send 2FA login OTP: {str(e)}")
                         return Response(
                             {'error': f'Failed to send OTP: {str(e)}'},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -572,12 +593,16 @@ class LoginView(views.APIView):
             accounts = Account.objects.filter(user=user)
             
             # Log successful login
-            LoginActivity.objects.create(
-                user=user,
-                ip_address=request.META.get('REMOTE_ADDR', ''),
-                user_agent=request.META.get('HTTP_USER_AGENT', ''),
-                login_successful=True
-            )
+            try:
+                LoginActivity.objects.create(
+                    user=user,
+                    ip_address=request.META.get('REMOTE_ADDR', '127.0.0.1'),
+                    location='Login',
+                    device=request.META.get('HTTP_USER_AGENT', 'Unknown')[:255]
+                )
+            except Exception as e:
+                # Don't fail login if logging fails
+                print(f"Failed to log login activity: {e}")
             
             response = Response({
                 'message': 'Login successful',
