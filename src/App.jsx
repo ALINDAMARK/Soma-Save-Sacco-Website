@@ -31,6 +31,8 @@ function ScrollToTop() {
 function App() {
   const location = useLocation();
   const isMemberPortal = location.pathname === '/member-portal';
+  const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname) || 
+                      location.pathname.startsWith('/reset-password');
 
   return (
     <ThemeProvider>
@@ -50,7 +52,7 @@ function App() {
           <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
         </Routes>
         {!isMemberPortal && <Footer />}
-        {!isMemberPortal && <WhatsAppButton />}
+        {!isMemberPortal && !isAuthPage && <WhatsAppButton />}
       </div>
     </ThemeProvider>
   );

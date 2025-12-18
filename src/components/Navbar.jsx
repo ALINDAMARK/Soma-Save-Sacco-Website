@@ -11,6 +11,10 @@ export default function Navbar() {
   const [userProfileImage, setUserProfileImage] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
+  
+  // Check if current page is an auth page
+  const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname) || 
+                      location.pathname.startsWith('/reset-password');
 
   // Check if user is logged in
   useEffect(() => {
@@ -159,16 +163,18 @@ export default function Navbar() {
                 </>
               )}
 
-              {/* Mobile Menu Button */}
-              <button
-                onClick={toggleMobileMenu}
-                className="md:hidden flex items-center justify-center w-10 h-10 text-gray-900 dark:text-white"
-                aria-label="Toggle menu"
-              >
-                <span className="material-symbols-outlined text-3xl">
-                  {isMobileMenuOpen ? 'close' : 'menu'}
-                </span>
-              </button>
+              {/* Mobile Menu Button - Hidden on Auth Pages */}
+              {!isAuthPage && (
+                <button
+                  onClick={toggleMobileMenu}
+                  className="md:hidden flex items-center justify-center w-10 h-10 text-gray-900 dark:text-white"
+                  aria-label="Toggle menu"
+                >
+                  <span className="material-symbols-outlined text-3xl">
+                    {isMobileMenuOpen ? 'close' : 'menu'}
+                  </span>
+                </button>
+              )}
             </div>
           </div>
         </div>
