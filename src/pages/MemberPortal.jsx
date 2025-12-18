@@ -236,31 +236,33 @@ export default function MemberPortal() {
           {/* Main Content */}
           <div className="flex-1">
             {activeTab === 'overview' && (
-              <div className="space-y-4">
-                {/* Welcome Header - Compact */}
-                <div className="rounded-xl bg-gradient-to-r from-primary to-green-400 p-6 shadow-lg animate-fadeInUp">
-                  <h1 className="text-2xl font-bold text-gray-900 mb-1">
-                    Yo! {displayName}
-                  </h1>
-                  <p className="text-gray-800 text-sm">
-                    Here's your account overview
-                  </p>
-                </div>
-
-                {/* Balances Section */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                      Balances
-                      <span className="material-symbols-outlined text-lg cursor-pointer hover:rotate-180 transition-transform">sync</span>
-                    </h2>
-                    <button className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
-                      View all
-                      <span className="material-symbols-outlined text-sm">chevron_right</span>
-                    </button>
+              <>
+                {/* MOBILE VERSION - Compact Design */}
+                <div className="space-y-4 lg:hidden">
+                  {/* Welcome Header - Compact */}
+                  <div className="rounded-xl bg-gradient-to-r from-primary to-green-400 p-6 shadow-lg animate-fadeInUp">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                      Yo! {displayName}
+                    </h1>
+                    <p className="text-gray-800 text-sm">
+                      Here's your account overview
+                    </p>
                   </div>
-                  
-                  <div className="grid grid-cols-2 gap-3">
+
+                  {/* Balances Section */}
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h2 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        Balances
+                        <span className="material-symbols-outlined text-lg cursor-pointer hover:rotate-180 transition-transform">sync</span>
+                      </h2>
+                      <button className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
+                        View all
+                        <span className="material-symbols-outlined text-sm">chevron_right</span>
+                      </button>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
                     {/* Total Savings Card */}
                     <div className="rounded-xl border-2 border-primary bg-gradient-to-br from-primary/10 to-primary/5 p-4 hover-lift cursor-pointer">
                       <div className="flex items-center gap-2 mb-3">
@@ -436,7 +438,129 @@ export default function MemberPortal() {
                     </button>
                   </div>
                 )}
-              </div>
+                </div>
+
+                {/* DESKTOP VERSION - Original Large Cards */}
+                <div className="hidden lg:block space-y-6">
+                  {/* Welcome Header */}
+                  <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-8 animate-fadeInUp">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                      Welcome Back, {displayName}!
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Here's an overview of your student account activity.
+                    </p>
+                  </div>
+
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-6 hover-lift animate-scaleIn stagger-1 cursor-pointer">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/20 text-primary hover-scale">
+                          <span className="material-symbols-outlined text-2xl">account_balance_wallet</span>
+                        </div>
+                        <span className="text-sm font-semibold text-primary">{stats.savings_growth}</span>
+                      </div>
+                      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{t('totalSavings')}</h3>
+                      <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                        {formatCurrency(stats.total_savings)}
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-6 hover-lift animate-scaleIn stagger-2 cursor-pointer">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/20 text-primary hover-scale">
+                          <span className="material-symbols-outlined text-2xl">trending_up</span>
+                        </div>
+                        <span className="text-sm font-semibold text-primary">
+                          {stats.active_loans_count > 0 ? 'Active' : 'None'}
+                        </span>
+                      </div>
+                      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">{t('activeLoans')}</h3>
+                      <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.active_loans_count}</p>
+                    </div>
+
+                    <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-6 hover-lift animate-scaleIn stagger-3 cursor-pointer">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/20 text-primary hover-scale">
+                          <span className="material-symbols-outlined text-2xl">star</span>
+                        </div>
+                        <span className="text-sm font-semibold text-primary">Earned</span>
+                      </div>
+                      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                        {t('dividends')} ({new Date().getFullYear()})
+                      </h3>
+                      <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                        {formatCurrency(stats.dividends)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Recent Transactions */}
+                  <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-8 animate-fadeInUp">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('recentTransactions')}</h2>
+                    {recent_transactions && recent_transactions.length > 0 ? (
+                      <div className="space-y-4">
+                        {recent_transactions.map((transaction, index) => (
+                          <div key={index} className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+                            <div className="flex items-center gap-4">
+                              <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
+                                transaction.amount.startsWith('+') || !transaction.amount.startsWith('-') 
+                                  ? 'bg-green-100 text-green-600' 
+                                  : 'bg-red-100 text-red-600'
+                              }`}>
+                                <span className="material-symbols-outlined text-xl">{transaction.icon}</span>
+                              </div>
+                              <div>
+                                <p className="font-semibold text-gray-900 dark:text-white">{transaction.type}</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">{transaction.date}</p>
+                              </div>
+                            </div>
+                            <p className={`text-lg font-bold ${
+                              transaction.amount.startsWith('+') || !transaction.amount.startsWith('-')
+                                ? 'text-green-600' 
+                                : 'text-red-600'
+                            }`}>
+                              {transaction.amount.startsWith('-') 
+                                ? '-' + formatCurrency(transaction.amount.substring(1))
+                                : '+' + formatCurrency(transaction.amount.startsWith('+') ? transaction.amount.substring(1) : transaction.amount)
+                              }
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <span className="material-symbols-outlined text-4xl text-gray-400 dark:text-gray-600 mb-2">receipt_long</span>
+                        <p className="text-gray-600 dark:text-gray-400">No transactions yet</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Quick Actions */}
+                  <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-8 animate-fadeInUp">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Quick Actions</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <Link to="/loan-application">
+                        <button className="w-full flex items-center gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-primary hover:bg-primary/5 transition-all">
+                          <span className="material-symbols-outlined text-primary text-2xl">payments</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">Apply for Loan</span>
+                        </button>
+                      </Link>
+                      <button className="w-full flex items-center gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-primary hover:bg-primary/5 transition-all">
+                        <span className="material-symbols-outlined text-primary text-2xl">savings</span>
+                        <span className="font-semibold text-gray-900 dark:text-white">Make Deposit</span>
+                      </button>
+                      <Link to="/contact">
+                        <button className="w-full flex items-center gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-primary hover:bg-primary/5 transition-all">
+                          <span className="material-symbols-outlined text-primary text-2xl">support_agent</span>
+                          <span className="font-semibold text-gray-900 dark:text-white">Contact Support</span>
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
 
             {activeTab !== 'overview' && (
