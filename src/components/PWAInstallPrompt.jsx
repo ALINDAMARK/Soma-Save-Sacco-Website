@@ -1,10 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 
-export default function PWAInstallPrompt() {
+const PWAInstallPrompt = forwardRef(({ showOnLogin = false }, ref) => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+
+  // Expose method to parent component
+  useImperativeHandle(ref, () => ({
+    showInstallPrompt: () => {
+      if (!isStandalone) {
+        setShowPrompt(true);
+      }
+    }
+  }));
 
   useEffect(() => {
     // Check if already installed
@@ -23,7 +32,7 @@ export default function PWAInstallPrompt() {
     // Show again after 7 days
     if (dismissed && dismissedTime) {
       const daysSinceDismissed = (Date.now() - parseInt(dismissedTime)) / (1000 * 60 * 60 * 24);
-      if (daysSinceDismissed < 7) {
+      if (daysSinceDismissed < 7 && !showOnLogin) {
         return;
       }
     }
@@ -32,20 +41,25 @@ export default function PWAInstallPrompt() {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      setShowPrompt(true);
+      if (showOnLogin) {
+        setShowPrompt(true);
+      }
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // For iOS, show manual instructions if not installed
-    if (iOS && !isInStandaloneMode && !dismissed) {
-      setTimeout(() => setShowPrompt(true), 3000); // Show after 3 seconds
+    // Show on login if prop is true
+    if (showOnLogin && !isInStandaloneMode) {
+      setTimeout(() => setShowPrompt(true), 2000); // Show after 2 seconds on login
+    } else if (iOS && !isInStandaloneMode && !dismissed) {
+      // For iOS, show manual instructions if not installed (regular visit)
+      setTimeout(() => setShowPrompt(true), 3000);
     }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, []);
+  }, [showOnLogin]);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
@@ -196,4 +210,8 @@ export default function PWAInstallPrompt() {
       </div>
     </>
   );
-}
+});
+
+PWAInstallPrompt.displayName = 'PWAInstallPrompt';
+
+export default PWAInstallPrompt;

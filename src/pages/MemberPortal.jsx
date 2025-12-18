@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSettings } from '../context/SettingsContext';
 import api from '../services/api';
@@ -18,6 +18,19 @@ export default function MemberPortal() {
   const [dashboardData, setDashboardData] = useState(null);
   const [error, setError] = useState('');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const pwaInstallRef = useRef(null);
+  
+  // Listen for custom event from Settings to show install prompt
+  useEffect(() => {
+    const handleShowInstall = () => {
+      if (pwaInstallRef.current) {
+        pwaInstallRef.current.showInstallPrompt();
+      }
+    };
+    
+    window.addEventListener('show-pwa-install', handleShowInstall);
+    return () => window.removeEventListener('show-pwa-install', handleShowInstall);
+  }, []);
 
   // Handle navigation from mobile menu
   useEffect(() => {
@@ -171,8 +184,8 @@ export default function MemberPortal() {
 
   return (
     <>
-      {/* PWA Install Prompt */}
-      <PWAInstallPrompt />
+      {/* PWA Install Prompt - Show on first login */}
+      <PWAInstallPrompt ref={pwaInstallRef} showOnLogin={true} />
       
       {/* Logout Loading Overlay */}
       {isLoggingOut && (

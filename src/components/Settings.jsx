@@ -536,6 +536,45 @@ export default function Settings({ user }) {
         </div>
       </div>
 
+      {/* App Installation */}
+      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-8 animate-fadeInUp">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">App Installation</h3>
+        
+        <div className="space-y-4">
+          <button 
+            onClick={() => {
+              // Trigger PWA install prompt
+              window.dispatchEvent(new CustomEvent('show-pwa-install'));
+            }}
+            className="w-full flex items-center justify-between p-4 rounded-lg border-2 border-primary bg-primary/5 hover:bg-primary/10 transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-primary text-2xl">install_mobile</span>
+              <div className="text-left">
+                <p className="font-semibold text-gray-900 dark:text-white">Install SomaSave App</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Get quick access from your home screen</p>
+              </div>
+            </div>
+            <span className="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform">arrow_forward</span>
+          </button>
+          
+          <div className="bg-gradient-to-r from-primary/10 to-transparent rounded-lg p-4">
+            <div className="flex gap-3">
+              <span className="material-symbols-outlined text-primary">info</span>
+              <div>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">Why install?</p>
+                <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                  <li>• Faster access to your portal</li>
+                  <li>• Works offline</li>
+                  <li>• App-like experience</li>
+                  <li>• No app store required</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Privacy */}
       <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 p-8 animate-fadeInUp">
         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Privacy & Data</h3>
