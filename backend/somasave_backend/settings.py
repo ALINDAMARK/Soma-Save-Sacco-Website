@@ -162,6 +162,16 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
+# CORS allowed methods
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
 # CSRF settings
 CSRF_TRUSTED_ORIGINS = [
     "https://somasave.com",
