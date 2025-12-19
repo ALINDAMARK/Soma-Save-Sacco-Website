@@ -990,6 +990,7 @@ class InitiateDepositView(views.APIView):
         import uuid
         import logging
         from django.utils import timezone
+        from .relworx import RelworxPaymentGateway
         
         logger = logging.getLogger(__name__)
         user = request.user
@@ -997,6 +998,7 @@ class InitiateDepositView(views.APIView):
         # Get amount from request
         amount = request.data.get('amount')
         phone_number = request.data.get('phone_number') or user.phone_number
+        currency = request.data.get('currency', 'UGX')  # Default to UGX
         
         if not amount:
             return Response({
@@ -1009,6 +1011,14 @@ class InitiateDepositView(views.APIView):
                 return Response({
                     'error': 'Amount must be greater than 0'
                 }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Check minimum amount based on currency
+            min_amounts = {'UGX': 500, 'KES': 10, 'TZS': 500, 'RWF': 100}
+            if currency in min_amounts and amount < min_amounts[currency]:
+                return Response({
+                    'error': f'Minimum amount for {currency} is {min_amounts[currency]}'
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
         except ValueError:
             return Response({
                 'error': 'Invalid amount'
@@ -1019,8 +1029,13 @@ class InitiateDepositView(views.APIView):
                 'error': 'Phone number is required'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Generate unique transaction reference
-        tx_ref = f"DEPOSIT_{user.id}_{uuid.uuid4().hex[:8].upper()}_{int(timezone.now().timestamp())}"
+        # Ensure phone number is in international format
+        if not phone_number.startswith('+'):
+            # Assume Uganda if no country code
+            phone_number = f"+256{phone_number.lstrip('0')}"
+        
+        # Generate unique transaction reference (8-36 characters as per Relworx spec)
+        tx_ref = f"SACCO_{user.id}_{uuid.uuid4().hex[:12].upper()}"
         
         # Create pending deposit record
         deposit = Deposit.objects.create(
@@ -1032,11 +1047,42 @@ class InitiateDepositView(views.APIView):
         
         logger.info(f"Deposit initiated: {tx_ref} for user {user.username}, amount: {amount}")
         
-        # Return payment details for frontend to process
+        # Initialize Relworx gateway and request payment
+        relworx = RelworxPaymentGateway()
+        result = relworx.request_payment(
+            reference=tx_ref,
+            msisdn=phone_number,
+            currency=currency,
+            amount=amount,
+            description=f"SomaSave SACCO Deposit - {user.first_name} {user.last_name}"
+        )
+        
+        if not result['success']:
+            # Mark deposit as failed
+            deposit.status = 'FAILED'
+            deposit.save()
+            
+            logger.error(f"Relworx payment request failed: {result.get('error')}")
+            return Response({
+                'error': result.get('error', 'Failed to initiate payment')
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Store Relworx internal reference
+        relworx_data = result['data']
+        deposit.transaction_id = relworx_data.get('internal_reference', '')
+        deposit.save()
+        
+        logger.info(f"Relworx payment initiated: {relworx_data}")
+        
+        # Return payment details
         return Response({
+            'success': True,
             'tx_ref': tx_ref,
+            'internal_reference': relworx_data.get('internal_reference'),
             'amount': amount,
+            'currency': currency,
             'phone_number': phone_number,
+            'message': relworx_data.get('message', 'Payment request sent. Please check your phone to complete payment.'),
             'user': {
                 'name': f"{user.first_name} {user.last_name}",
                 'email': user.email
@@ -1045,7 +1091,7 @@ class InitiateDepositView(views.APIView):
 
 
 class VerifyDepositView(views.APIView):
-    """Verify deposit payment and update database"""
+    """Verify deposit payment status with Relworx"""
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
@@ -1053,13 +1099,12 @@ class VerifyDepositView(views.APIView):
         from decimal import Decimal
         from django.utils import timezone
         from django.db import transaction
+        from .relworx import RelworxPaymentGateway
         
         logger = logging.getLogger(__name__)
         user = request.user
         
         tx_ref = request.data.get('tx_ref')
-        payment_status = request.data.get('status')
-        transaction_id = request.data.get('transaction_id')
         
         if not tx_ref:
             return Response({
@@ -1070,17 +1115,44 @@ class VerifyDepositView(views.APIView):
             # Get the deposit record
             deposit = Deposit.objects.get(tx_ref=tx_ref, user=user)
             
+            if deposit.status == 'COMPLETED':
+                # Already processed
+                account = Account.objects.get(user=user, account_type='SAVINGS')
+                return Response({
+                    'message': 'Deposit already completed',
+                    'tx_ref': tx_ref,
+                    'amount': float(deposit.amount),
+                    'new_balance': float(account.balance),
+                    'status': 'COMPLETED'
+                })
+            
             if deposit.status != 'PENDING':
                 return Response({
                     'error': 'Transaction already processed',
                     'status': deposit.status
                 }, status=status.HTTP_400_BAD_REQUEST)
             
-            # Update deposit status
-            if payment_status == 'successful':
+            # Check status with Relworx
+            relworx = RelworxPaymentGateway()
+            result = relworx.check_request_status(customer_reference=tx_ref)
+            
+            if not result['success']:
+                return Response({
+                    'error': 'Failed to verify payment status',
+                    'details': result.get('error')
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            payment_data = result['data']
+            payment_status = payment_data.get('request_status') or payment_data.get('status')
+            
+            logger.info(f"Payment status from Relworx: {payment_status} for {tx_ref}")
+            
+            # Update deposit based on status
+            if payment_status == 'success':
                 with transaction.atomic():
                     # Update deposit record
                     deposit.status = 'COMPLETED'
+                    deposit.transaction_id = payment_data.get('provider_transaction_id', deposit.transaction_id)
                     deposit.save()
                     
                     # Get or create user's savings account
@@ -1097,16 +1169,18 @@ class VerifyDepositView(views.APIView):
                     account.balance += Decimal(str(deposit.amount))
                     account.save()
                     
-                    logger.info(f"Deposit verified: {tx_ref}, amount: {deposit.amount}, new balance: {account.balance}")
+                    logger.info(f"Deposit completed: {tx_ref}, amount: {deposit.amount}, new balance: {account.balance}")
                     
                     return Response({
                         'message': 'Deposit successful',
                         'tx_ref': tx_ref,
                         'amount': float(deposit.amount),
                         'new_balance': float(account.balance),
-                        'status': 'COMPLETED'
+                        'status': 'COMPLETED',
+                        'provider_transaction_id': payment_data.get('provider_transaction_id')
                     })
-            else:
+                    
+            elif payment_status in ['failed', 'cancelled']:
                 # Payment failed or cancelled
                 deposit.status = 'FAILED'
                 deposit.save()
@@ -1116,8 +1190,17 @@ class VerifyDepositView(views.APIView):
                 return Response({
                     'error': 'Payment failed or was cancelled',
                     'tx_ref': tx_ref,
-                    'status': 'FAILED'
+                    'status': 'FAILED',
+                    'message': payment_data.get('message')
                 }, status=status.HTTP_400_BAD_REQUEST)
+                
+            else:
+                # Still pending
+                return Response({
+                    'message': 'Payment is still being processed',
+                    'tx_ref': tx_ref,
+                    'status': 'PENDING'
+                }, status=status.HTTP_202_ACCEPTED)
                 
         except Deposit.DoesNotExist:
             return Response({
@@ -1128,3 +1211,115 @@ class VerifyDepositView(views.APIView):
             return Response({
                 'error': f'Error processing payment: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class RelworxWebhookView(views.APIView):
+    """Handle webhook callbacks from Relworx"""
+    permission_classes = [AllowAny]  # Webhooks don't use authentication
+    
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+    
+    def post(self, request):
+        import logging
+        from decimal import Decimal
+        from django.db import transaction
+        from .relworx import RelworxPaymentGateway
+        
+        logger = logging.getLogger(__name__)
+        
+        # Get webhook signature from header
+        signature_header = request.META.get('HTTP_RELWORX_SIGNATURE', '')
+        
+        if not signature_header:
+            logger.warning("Webhook received without signature")
+            return Response({'error': 'Missing signature'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Parse signature header: "t=timestamp,v=signature"
+        parts = dict(part.split('=') for part in signature_header.split(','))
+        timestamp = parts.get('t')
+        signature = parts.get('v')
+        
+        if not timestamp or not signature:
+            logger.warning("Invalid signature format")
+            return Response({'error': 'Invalid signature format'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Get webhook data
+        webhook_data = {
+            'status': request.data.get('status'),
+            'customer_reference': request.data.get('customer_reference'),
+            'internal_reference': request.data.get('internal_reference')
+        }
+        
+        # Verify signature
+        relworx = RelworxPaymentGateway()
+        webhook_url = request.build_absolute_uri()
+        
+        is_valid = relworx.verify_webhook_signature(
+            webhook_url=webhook_url,
+            timestamp=timestamp,
+            signature=signature,
+            params=webhook_data
+        )
+        
+        if not is_valid:
+            logger.warning(f"Invalid webhook signature for {webhook_data.get('customer_reference')}")
+            return Response({'error': 'Invalid signature'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        logger.info(f"Valid webhook received: {webhook_data}")
+        
+        # Process the webhook
+        customer_reference = webhook_data.get('customer_reference')
+        payment_status = webhook_data.get('status')
+        internal_reference = webhook_data.get('internal_reference')
+        
+        try:
+            # Find the deposit by customer reference (our tx_ref)
+            deposit = Deposit.objects.get(tx_ref=customer_reference)
+            
+            if deposit.status != 'PENDING':
+                # Already processed, acknowledge webhook
+                logger.info(f"Webhook for already processed transaction: {customer_reference}")
+                return Response({'success': True, 'message': 'Already processed'}, status=status.HTTP_200_OK)
+            
+            if payment_status == 'success':
+                with transaction.atomic():
+                    # Update deposit record
+                    deposit.status = 'COMPLETED'
+                    deposit.transaction_id = internal_reference or deposit.transaction_id
+                    deposit.save()
+                    
+                    # Get or create user's savings account
+                    account, created = Account.objects.get_or_create(
+                        user=deposit.user,
+                        account_type='SAVINGS',
+                        defaults={
+                            'account_number': f"SAV{deposit.user.id:06d}",
+                            'balance': Decimal('0.00')
+                        }
+                    )
+                    
+                    # Update account balance
+                    account.balance += Decimal(str(deposit.amount))
+                    account.save()
+                    
+                    logger.info(f"Webhook processed: {customer_reference}, amount: {deposit.amount}, new balance: {account.balance}")
+                    
+                    # TODO: Send email notification to user
+                    
+            elif payment_status in ['failed', 'cancelled']:
+                deposit.status = 'FAILED'
+                deposit.save()
+                logger.info(f"Webhook: Payment failed for {customer_reference}")
+            
+            # Acknowledge webhook
+            return Response({'success': True}, status=status.HTTP_200_OK)
+            
+        except Deposit.DoesNotExist:
+            logger.error(f"Webhook: Deposit not found for reference {customer_reference}")
+            return Response({'error': 'Transaction not found'}, status=status.HTTP_404_NOT_FOUND)
+            
+        except Exception as e:
+            logger.error(f"Webhook error: {str(e)}", exc_info=True)
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

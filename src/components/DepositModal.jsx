@@ -8,10 +8,11 @@ export default function DepositModal({ isOpen, onClose, user, onSuccess }) {
   const [amount, setAmount] = useState('');
   const [phoneNumber, setPhoneNumber] = useState(user?.phone_number || '');
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(1); // 1: Amount, 2: Payment Processing
+  const [step, setStep] = useState(1); // 1: Amount, 2: Payment Processing, 3: Verifying
   const [txRef, setTxRef] = useState('');
+  const [internalRef, setInternalRef] = useState('');
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
-  const [paymentWindow, setPaymentWindow] = useState(null);
+  const [pollingInterval, setPollingInterval] = useState(null);
 
   useEffect(() => {
     if (user?.phone_number) {
@@ -19,15 +20,28 @@ export default function DepositModal({ isOpen, onClose, user, onSuccess }) {
     }
   }, [user]);
 
-  const handleVerifyPayment = async (status, transactionId) => {
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+    };
+  }, [pollingInterval]);
+
+  const checkPaymentStatus = async (txReference) => {
     try {
       const response = await api.payments.verifyDeposit({
-        tx_ref: txRef,
-        status: status,
-        transaction_id: transactionId
+        tx_ref: txReference
       });
 
       if (response.status === 'COMPLETED') {
+        // Clear polling
+        if (pollingInterval) {
+          clearInterval(pollingInterval);
+          setPollingInterval(null);
+        }
+
         setToast({
           show: true,
           message: `Deposit of ${formatCurrency(response.amount)} successful! New balance: ${formatCurrency(response.new_balance)}`,
@@ -43,49 +57,27 @@ export default function DepositModal({ isOpen, onClose, user, onSuccess }) {
         setTimeout(() => {
           handleClose();
         }, 2000);
-      } else {
+      } else if (response.status === 'FAILED') {
+        // Clear polling
+        if (pollingInterval) {
+          clearInterval(pollingInterval);
+          setPollingInterval(null);
+        }
+
         setToast({
           show: true,
           message: 'Payment failed or was cancelled',
           type: 'error'
         });
         setStep(1);
+        setLoading(false);
       }
+      // If still PENDING, keep polling
     } catch (error) {
-      console.error('Verification error:', error);
-      setToast({
-        show: true,
-        message: error.message || 'Error verifying payment',
-        type: 'error'
-      });
-      setStep(1);
-    } finally {
-      setLoading(false);
+      console.error('Status check error:', error);
+      // Don't show error for status checks, just keep polling
     }
   };
-
-  // Listen for payment completion messages
-  useEffect(() => {
-    const handleMessage = async (event) => {
-      // Verify origin for security
-      if (event.origin !== 'https://payments.relworx.com') return;
-
-      const { status, transaction_id, tx_ref: receivedTxRef } = event.data;
-
-      if (receivedTxRef === txRef) {
-        // Close payment window
-        if (paymentWindow && !paymentWindow.closed) {
-          paymentWindow.close();
-        }
-
-        // Verify payment with backend
-        await handleVerifyPayment(status, transaction_id);
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [txRef, paymentWindow]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -112,62 +104,43 @@ export default function DepositModal({ isOpen, onClose, user, onSuccess }) {
     setStep(2);
 
     try {
-      // Initiate deposit
+      // Initiate deposit - backend will call Relworx API
       const response = await api.payments.initiateDeposit({
         amount: parseFloat(amount),
         phone_number: phoneNumber
       });
 
-      setTxRef(response.tx_ref);
+      if (response.success) {
+        setTxRef(response.tx_ref);
+        setInternalRef(response.internal_reference);
 
-      // Build Relworx payment URL
-      const paymentUrl = new URL('https://payments.relworx.com/pay');
-      paymentUrl.searchParams.append('amount', response.amount);
-      paymentUrl.searchParams.append('phone', response.phone_number);
-      paymentUrl.searchParams.append('tx_ref', response.tx_ref);
-      paymentUrl.searchParams.append('customer_name', response.user.name);
-      paymentUrl.searchParams.append('customer_email', response.user.email);
-      paymentUrl.searchParams.append('description', 'SomaSave SACCO Deposit');
-      paymentUrl.searchParams.append('callback_url', window.location.origin + '/member-portal');
-
-      // Open payment in new window
-      const width = 500;
-      const height = 700;
-      const left = (window.screen.width - width) / 2;
-      const top = (window.screen.height - height) / 2;
-      
-      const popup = window.open(
-        paymentUrl.toString(),
-        'Relworx Payment',
-        `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
-      );
-
-      setPaymentWindow(popup);
-
-      if (!popup) {
         setToast({
           show: true,
-          message: 'Please allow pop-ups to complete payment',
+          message: response.message || 'Payment request sent! Please check your phone to complete payment.',
+          type: 'info'
+        });
+
+        // Start polling for payment status every 3 seconds
+        const interval = setInterval(() => {
+          checkPaymentStatus(response.tx_ref);
+        }, 3000);
+        
+        setPollingInterval(interval);
+
+        // Also check immediately after 2 seconds
+        setTimeout(() => {
+          checkPaymentStatus(response.tx_ref);
+        }, 2000);
+
+      } else {
+        setToast({
+          show: true,
+          message: response.error || 'Failed to initiate payment',
           type: 'error'
         });
         setStep(1);
         setLoading(false);
-        return;
       }
-
-      // Monitor if popup is closed manually
-      const checkClosed = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkClosed);
-          setLoading(false);
-          setStep(1);
-          setToast({
-            show: true,
-            message: 'Payment window was closed',
-            type: 'info'
-          });
-        }
-      }, 1000);
 
     } catch (error) {
       console.error('Deposit error:', error);
@@ -194,9 +167,12 @@ export default function DepositModal({ isOpen, onClose, user, onSuccess }) {
   };
 
   const handleClose = () => {
-    if (paymentWindow && !paymentWindow.closed) {
-      paymentWindow.close();
+    // Clear any active polling
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+      setPollingInterval(null);
     }
+
     setAmount('');
     setStep(1);
     setTxRef('');
@@ -304,13 +280,24 @@ export default function DepositModal({ isOpen, onClose, user, onSuccess }) {
                 </span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                Processing Payment
+                Payment Request Sent
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Complete the payment in the popup window
+                Check your phone for a Mobile Money payment prompt
               </p>
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <p className="text-sm text-blue-800 dark:text-blue-200 font-semibold mb-2">
+                  📱 Complete the payment on your phone
+                </p>
+                <p className="text-xs text-blue-600 dark:text-blue-300">
+                  You should receive a prompt on {phoneNumber}
+                </p>
+              </div>
               <p className="text-sm text-gray-500 dark:text-gray-500">
                 Transaction Reference: {txRef}
+              </p>
+              <p className="text-xs text-gray-400 dark:text-gray-600">
+                Waiting for payment confirmation...
               </p>
               <button
                 onClick={handleClose}

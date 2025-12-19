@@ -267,3 +267,16 @@ cloudinary.config(
     api_secret=os.getenv('CLOUDINARY_API_SECRET', 'Y7X7ttx7sw6XPkqAjS04-sa6qHc'),
     secure=True
 )
+
+# Relworx Payment Gateway Configuration
+RELWORX_API_KEY = os.getenv('RELWORX_API_KEY', '55cbd4454b75ef.4MsHHl_YCvRQnCYdF0ybmA')
+RELWORX_ACCOUNT_NO = os.getenv('RELWORX_ACCOUNT_NO', 'RELEAE2072EE4')
+RELWORX_WEBHOOK_KEY = os.getenv('RELWORX_WEBHOOK_KEY', '191dc8aec53073d24fbd357368')
+RELWORX_API_URL = 'https://payments.relworx.com/api'
+
+logger.info("=" * 60)
+logger.info("RELWORX PAYMENT CONFIGURATION")
+logger.info(f"RELWORX_API_KEY configured: {bool(RELWORX_API_KEY)}")
+logger.info(f"RELWORX_ACCOUNT_NO: {RELWORX_ACCOUNT_NO}")
+logger.info(f"RELWORX_WEBHOOK_KEY configured: {bool(RELWORX_WEBHOOK_KEY)}")
+logger.info("=" * 60)

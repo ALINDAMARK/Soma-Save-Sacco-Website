@@ -7,7 +7,7 @@ from .views import (
     UniversityViewSet, CourseViewSet,
     RegisterView, LoginView, LogoutView, CurrentUserView, DashboardStatsView,
     PasswordResetRequestView, PasswordResetConfirmView, TestEmailConfigView,
-    InitiateDepositView, VerifyDepositView
+    InitiateDepositView, VerifyDepositView, RelworxWebhookView
 )
 
 router = DefaultRouter()
@@ -37,4 +37,5 @@ urlpatterns = [
     path('test/email-config/', TestEmailConfigView.as_view(), name='test-email-config'),
     path('payments/initiate-deposit/', InitiateDepositView.as_view(), name='initiate-deposit'),
     path('payments/verify-deposit/', VerifyDepositView.as_view(), name='verify-deposit'),
+    path('payments/relworx-webhook/', RelworxWebhookView.as_view(), name='relworx-webhook'),
 ]
