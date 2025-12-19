@@ -471,6 +471,49 @@ const api = {
       return response.json();
     },
   },
+
+  // Payment endpoints
+  payments: {
+    initiateDeposit: async (data) => {
+      const csrftoken = getCookie('csrftoken');
+      const response = await fetch(`${API_BASE_URL}/payments/initiate-deposit/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to initiate deposit');
+      }
+      
+      return response.json();
+    },
+
+    verifyDeposit: async (data) => {
+      const csrftoken = getCookie('csrftoken');
+      const response = await fetch(`${API_BASE_URL}/payments/verify-deposit/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to verify deposit');
+      }
+      
+      return response.json();
+    },
+  },
 };
 
 export default api;

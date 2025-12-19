@@ -6,7 +6,8 @@ from .views import (
     RepaymentScheduleViewSet, ReportViewSet, NationalIDVerificationViewSet,
     UniversityViewSet, CourseViewSet,
     RegisterView, LoginView, LogoutView, CurrentUserView, DashboardStatsView,
-    PasswordResetRequestView, PasswordResetConfirmView, TestEmailConfigView
+    PasswordResetRequestView, PasswordResetConfirmView, TestEmailConfigView,
+    InitiateDepositView, VerifyDepositView
 )
 
 router = DefaultRouter()
@@ -34,4 +35,6 @@ urlpatterns = [
     path('auth/password-reset-confirm/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
     path('dashboard/stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
     path('test/email-config/', TestEmailConfigView.as_view(), name='test-email-config'),
+    path('payments/initiate-deposit/', InitiateDepositView.as_view(), name='initiate-deposit'),
+    path('payments/verify-deposit/', VerifyDepositView.as_view(), name='verify-deposit'),
 ]

@@ -8,6 +8,7 @@ import Transactions from '../components/Transactions';
 import Profile from '../components/Profile';
 import Settings from '../components/Settings';
 import PWAInstallPrompt from '../components/PWAInstallPrompt';
+import DepositModal from '../components/DepositModal';
 
 export default function MemberPortal() {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ export default function MemberPortal() {
   const [dashboardData, setDashboardData] = useState(null);
   const [error, setError] = useState('');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showDepositModal, setShowDepositModal] = useState(false);
   const pwaInstallRef = useRef(null);
   
   // Listen for custom event from Settings to show install prompt
@@ -126,6 +128,11 @@ export default function MemberPortal() {
     { id: 'profile', label: t('profile'), icon: 'person' },
     { id: 'settings', label: t('settings'), icon: 'settings' }
   ];
+
+  const handleDepositSuccess = (response) => {
+    // Refresh dashboard data after successful deposit
+    window.location.reload();
+  };
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -373,14 +380,14 @@ export default function MemberPortal() {
                     </Link>
                     
                     <button 
-                      onClick={() => setActiveTab('savings')}
+                      onClick={() => setShowDepositModal(true)}
                       className="w-full bg-gray-800 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 rounded-xl p-4 transition-all hover-lift"
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center">
                           <span className="material-symbols-outlined text-white text-xl">savings</span>
                         </div>
-                        <span className="font-bold text-white text-left">My Savings</span>
+                        <span className="font-bold text-white text-left">Make Deposit</span>
                       </div>
                     </button>
                     
@@ -564,7 +571,10 @@ export default function MemberPortal() {
                           <span className="font-semibold text-gray-900 dark:text-white">Apply for Loan</span>
                         </button>
                       </Link>
-                      <button className="w-full flex items-center gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-primary hover:bg-primary/5 transition-all">
+                      <button 
+                        onClick={() => setShowDepositModal(true)}
+                        className="w-full flex items-center gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-primary hover:bg-primary/5 transition-all"
+                      >
                         <span className="material-symbols-outlined text-primary text-2xl">savings</span>
                         <span className="font-semibold text-gray-900 dark:text-white">Make Deposit</span>
                       </button>
@@ -644,6 +654,14 @@ export default function MemberPortal() {
           </p>
         </div>
       </footer>
+      
+      {/* Deposit Modal */}
+      <DepositModal 
+        isOpen={showDepositModal}
+        onClose={() => setShowDepositModal(false)}
+        user={dashboardData?.user}
+        onSuccess={handleDepositSuccess}
+      />
     </>
   );
 }

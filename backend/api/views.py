@@ -980,3 +980,151 @@ class TestEmailConfigView(views.APIView):
                 'message': f'Failed to send test email: {str(e)}',
                 'error_type': type(e).__name__
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class InitiateDepositView(views.APIView):
+    """Initiate a deposit payment with Relworx"""
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        import uuid
+        import logging
+        from django.utils import timezone
+        
+        logger = logging.getLogger(__name__)
+        user = request.user
+        
+        # Get amount from request
+        amount = request.data.get('amount')
+        phone_number = request.data.get('phone_number') or user.phone_number
+        
+        if not amount:
+            return Response({
+                'error': 'Amount is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            amount = float(amount)
+            if amount <= 0:
+                return Response({
+                    'error': 'Amount must be greater than 0'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError:
+            return Response({
+                'error': 'Invalid amount'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not phone_number:
+            return Response({
+                'error': 'Phone number is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Generate unique transaction reference
+        tx_ref = f"DEPOSIT_{user.id}_{uuid.uuid4().hex[:8].upper()}_{int(timezone.now().timestamp())}"
+        
+        # Create pending deposit record
+        deposit = Deposit.objects.create(
+            user=user,
+            tx_ref=tx_ref,
+            amount=amount,
+            status='PENDING'
+        )
+        
+        logger.info(f"Deposit initiated: {tx_ref} for user {user.username}, amount: {amount}")
+        
+        # Return payment details for frontend to process
+        return Response({
+            'tx_ref': tx_ref,
+            'amount': amount,
+            'phone_number': phone_number,
+            'user': {
+                'name': f"{user.first_name} {user.last_name}",
+                'email': user.email
+            }
+        })
+
+
+class VerifyDepositView(views.APIView):
+    """Verify deposit payment and update database"""
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        import logging
+        from decimal import Decimal
+        from django.utils import timezone
+        from django.db import transaction
+        
+        logger = logging.getLogger(__name__)
+        user = request.user
+        
+        tx_ref = request.data.get('tx_ref')
+        payment_status = request.data.get('status')
+        transaction_id = request.data.get('transaction_id')
+        
+        if not tx_ref:
+            return Response({
+                'error': 'Transaction reference is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Get the deposit record
+            deposit = Deposit.objects.get(tx_ref=tx_ref, user=user)
+            
+            if deposit.status != 'PENDING':
+                return Response({
+                    'error': 'Transaction already processed',
+                    'status': deposit.status
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Update deposit status
+            if payment_status == 'successful':
+                with transaction.atomic():
+                    # Update deposit record
+                    deposit.status = 'COMPLETED'
+                    deposit.save()
+                    
+                    # Get or create user's savings account
+                    account, created = Account.objects.get_or_create(
+                        user=user,
+                        account_type='SAVINGS',
+                        defaults={
+                            'account_number': f"SAV{user.id:06d}",
+                            'balance': Decimal('0.00')
+                        }
+                    )
+                    
+                    # Update account balance
+                    account.balance += Decimal(str(deposit.amount))
+                    account.save()
+                    
+                    logger.info(f"Deposit verified: {tx_ref}, amount: {deposit.amount}, new balance: {account.balance}")
+                    
+                    return Response({
+                        'message': 'Deposit successful',
+                        'tx_ref': tx_ref,
+                        'amount': float(deposit.amount),
+                        'new_balance': float(account.balance),
+                        'status': 'COMPLETED'
+                    })
+            else:
+                # Payment failed or cancelled
+                deposit.status = 'FAILED'
+                deposit.save()
+                
+                logger.warning(f"Deposit failed: {tx_ref}, status: {payment_status}")
+                
+                return Response({
+                    'error': 'Payment failed or was cancelled',
+                    'tx_ref': tx_ref,
+                    'status': 'FAILED'
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+        except Deposit.DoesNotExist:
+            return Response({
+                'error': 'Transaction not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error verifying deposit: {str(e)}", exc_info=True)
+            return Response({
+                'error': f'Error processing payment: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
