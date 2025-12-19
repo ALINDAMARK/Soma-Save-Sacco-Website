@@ -14,11 +14,6 @@ export default function DepositModal({ isOpen, onClose, user, onSuccess }) {
   const [paymentWindow, setPaymentWindow] = useState(null);
 
   useEffect(() => {
-    console.log('DepositModal isOpen:', isOpen);
-    console.log('User data:', user);
-  }, [isOpen, user]);
-
-  useEffect(() => {
     if (user?.phone_number) {
       setPhoneNumber(user.phone_number);
     }

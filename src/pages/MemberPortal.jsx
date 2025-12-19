@@ -130,12 +130,10 @@ export default function MemberPortal() {
   ];
 
   const handleDepositClick = () => {
-    console.log('Deposit button clicked, opening modal...');
     setShowDepositModal(true);
   };
 
   const handleDepositSuccess = (response) => {
-    console.log('Deposit successful:', response);
     // Refresh dashboard data after successful deposit
     window.location.reload();
   };
