@@ -150,10 +150,11 @@ self.addEventListener('push', (event) => {
     icon: notificationData.icon,
     badge: notificationData.badge,
     tag: 'somasave-' + Date.now(), // Unique tag to show multiple notifications
-    requireInteraction: true, // Keeps notification visible until user interacts
-    vibrate: [200, 100, 200], // Vibration pattern: vibrate, pause, vibrate
-    silent: false, // Ensure notification makes sound
-    renotify: true, // Alert user even if tag matches previous notification
+    requireInteraction: false, // Allow auto-dismiss on mobile for better UX
+    vibrate: [300, 100, 300, 100, 300], // Strong vibration pattern for attention
+    silent: false, // CRITICAL: Ensure notification makes sound (NOT silenced)
+    renotify: true, // Alert user even if similar notification exists
+    timestamp: Date.now(), // Show when notification was sent
     actions: [
       {
         action: 'open',
@@ -162,7 +163,7 @@ self.addEventListener('push', (event) => {
       },
       {
         action: 'close',
-        title: '❌ Dismiss',
+        title: '✕ Dismiss',
         icon: '/icon-192x192.png'
       }
     ],
