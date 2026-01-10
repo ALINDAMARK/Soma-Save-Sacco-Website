@@ -112,74 +112,119 @@ self.addEventListener('message', (event) => {
 
 // Push notification event handler
 self.addEventListener('push', (event) => {
-  console.log('Push notification received:', event);
+  console.log('📬 Push notification received:', event);
   
   let notificationData = {
-    title: 'SomaSave',
+    title: '🔔 SomaSave SACCO',
     body: 'You have a new notification',
     icon: '/icon-192x192.png',
     badge: '/icon-192x192.png',
-    url: '/'
+    image: null,
+    url: '/member-portal'
   };
   
-  // Parse notification data
+  // Parse notification data from backend
   if (event.data) {
     try {
       const data = event.data.json();
+      console.log('📨 Notification data:', data);
+      
       notificationData = {
         title: data.title || notificationData.title,
         body: data.body || notificationData.body,
         icon: data.icon || notificationData.icon,
         badge: data.badge || notificationData.badge,
+        image: data.image || null,
         url: data.url || notificationData.url,
         data: data.data || {}
       };
     } catch (e) {
-      console.error('Error parsing notification data:', e);
+      console.error('❌ Error parsing notification data:', e);
       notificationData.body = event.data.text();
     }
   }
   
-  // Show notification
+  // Enhanced notification options for professional appearance
+  const notificationOptions = {
+    body: notificationData.body,
+    icon: notificationData.icon,
+    badge: notificationData.badge,
+    tag: 'somasave-' + Date.now(), // Unique tag to show multiple notifications
+    requireInteraction: true, // Keeps notification visible until user interacts
+    vibrate: [200, 100, 200], // Vibration pattern: vibrate, pause, vibrate
+    silent: false, // Ensure notification makes sound
+    renotify: true, // Alert user even if tag matches previous notification
+    actions: [
+      {
+        action: 'open',
+        title: '📱 Open App',
+        icon: '/icon-192x192.png'
+      },
+      {
+        action: 'close',
+        title: '❌ Dismiss',
+        icon: '/icon-192x192.png'
+      }
+    ],
+    data: {
+      url: notificationData.url,
+      timestamp: Date.now(),
+      ...notificationData.data
+    }
+  };
+  
+  // Add image if provided (shows large image in notification)
+  if (notificationData.image) {
+    notificationOptions.image = notificationData.image;
+  }
+  
+  // Show notification with all options
   const promiseChain = self.registration.showNotification(
     notificationData.title,
-    {
-      body: notificationData.body,
-      icon: notificationData.icon,
-      badge: notificationData.badge,
-      tag: 'somasave-notification',
-      requireInteraction: false,
-      data: {
-        url: notificationData.url,
-        ...notificationData.data
-      }
-    }
+    notificationOptions
   );
   
+  console.log('✅ Notification displayed:', notificationData.title);
   event.waitUntil(promiseChain);
 });
 
-// Notification click handler
+// Notification click handler - handles both notification click and action button clicks
 self.addEventListener('notificationclick', (event) => {
-  console.log('Notification clicked:', event);
+  console.log('🖱️ Notification clicked:', event);
   
   event.notification.close();
   
+  // Handle action button clicks
+  if (event.action === 'close') {
+    console.log('❌ User dismissed notification');
+    return;
+  }
+  
   // Get the URL from notification data
   const urlToOpen = event.notification.data?.url || '/member-portal';
+  
+  console.log('🌐 Opening URL:', urlToOpen);
   
   // Open or focus the app
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
-        // Check if there's already a window open
+        // Check if there's already a window open with the target URL
         for (const client of clientList) {
-          if (client.url.includes(urlToOpen) && 'focus' in client) {
-            return client.focus();
+          if (client.url.includes('/member-portal') && 'focus' in client) {
+            console.log('✅ Focusing existing window');
+            return client.focus().then(client => {
+              // Navigate to specific URL if different
+              if (urlToOpen !== '/member-portal') {
+                return client.navigate(urlToOpen);
+              }
+              return client;
+            });
           }
         }
         
         // Open a new window if none exists
+        console.log('🆕 Opening new window');
         if (clients.openWindow) {
           return clients.openWindow(urlToOpen);
         }

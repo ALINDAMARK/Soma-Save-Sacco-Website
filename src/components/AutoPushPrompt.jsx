@@ -178,45 +178,55 @@ const AutoPushPrompt = () => {
             <span className="material-symbols-outlined text-4xl text-primary">notifications_active</span>
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Stay Updated!
+            Enable Notifications
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
-            Get instant notifications for important updates:
+            Stay informed with real-time updates from SomaSave SACCO
           </p>
         </div>
 
         <div className="space-y-3 mb-6">
           <div className="flex items-start gap-3">
-            <span className="material-symbols-outlined text-green-500 mt-0.5">check_circle</span>
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              <strong>Deposit confirmations</strong> - Know immediately when your money is credited
-            </p>
+            <span className="material-symbols-outlined text-green-500 mt-0.5">account_balance</span>
+            <div>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Deposit Confirmations</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">Instant alerts when your savings are credited</p>
+            </div>
           </div>
           <div className="flex items-start gap-3">
-            <span className="material-symbols-outlined text-green-500 mt-0.5">check_circle</span>
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              <strong>Payment reminders</strong> - Never miss a loan payment deadline
-            </p>
+            <span className="material-symbols-outlined text-blue-500 mt-0.5">payments</span>
+            <div>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Loan Payment Reminders</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">Never miss a payment deadline</p>
+            </div>
           </div>
           <div className="flex items-start gap-3">
-            <span className="material-symbols-outlined text-green-500 mt-0.5">check_circle</span>
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              <strong>Important announcements</strong> - Stay informed about events and updates
-            </p>
+            <span className="material-symbols-outlined text-purple-500 mt-0.5">campaign</span>
+            <div>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Important Announcements</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">Stay updated on SACCO events and notices</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="material-symbols-outlined text-orange-500 mt-0.5">security</span>
+            <div>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Security Alerts</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">Account activity and security notifications</p>
+            </div>
           </div>
         </div>
 
-        <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-          <p className="text-xs text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
-            <span className="material-symbols-outlined text-base">info</span>
-            <strong>Required:</strong> Notifications are mandatory for all members to ensure important updates are received.
+        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <p className="text-xs text-blue-800 dark:text-blue-200 flex items-start gap-2">
+            <span className="material-symbols-outlined text-base flex-shrink-0 mt-0.5">info</span>
+            <span><strong>Mandatory Requirement:</strong> All SomaSave members must enable notifications to receive critical financial updates and maintain active membership status.</span>
           </p>
         </div>
 
         <button
           onClick={enableNotifications}
           disabled={loading}
-          className="w-full px-4 py-3 rounded-lg bg-primary hover:bg-primary-dark text-white font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full px-6 py-4 rounded-lg bg-primary hover:bg-primary-dark text-gray-900 text-base font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
         >
           {loading ? (
             <>
@@ -224,18 +234,18 @@ const AutoPushPrompt = () => {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Enabling...
+              Activating Notifications...
             </>
           ) : (
             <>
-              <span className="material-symbols-outlined">notifications</span>
-              Enable Notifications Now
+              <span className="material-symbols-outlined">notifications_active</span>
+              Enable Notifications
             </>
           )}
         </button>
 
         <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-4">
-          Click "Allow" in your browser to activate notifications
+          🔒 Click "Allow" when your browser prompts for permission
         </p>
       </div>
     </div>
