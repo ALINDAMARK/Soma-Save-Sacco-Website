@@ -81,8 +81,9 @@ class CustomUserAdmin(UserAdmin):
     actions = [send_push_notification_to_selected]
     fieldsets = UserAdmin.fieldsets + (
         ('Student Information', {'fields': ('student_id', 'university', 'course', 'year_of_study')}),
-        ('Contact Information', {'fields': ('phone_number', 'national_id', 'date_of_birth', 'gender', 'next_of_kin')}),
+        ('Contact Information', {'fields': ('phone_number', 'national_id', 'date_of_birth', 'gender', 'next_of_kin', 'profile_image')}),
         ('Verification', {'fields': ('is_verified', 'otp_code', 'otp_created_at')}),
+        ('Preferences', {'fields': ('email_notifications', 'sms_notifications', 'transaction_alerts', 'loan_reminders', 'marketing_emails', 'push_notifications_enabled', 'language', 'currency', 'two_factor_auth')}),
     )
 
 admin.site.register(Account)
