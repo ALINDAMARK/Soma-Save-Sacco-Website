@@ -61,9 +61,6 @@ const AutoPushPrompt = () => {
       setAttemptingAuto(false);
     }
   };
-      setAttemptingAuto(false);
-    }
-  };
 
   const autoSubscribe = async () => {
     try {
