@@ -12,11 +12,22 @@ const AutoPushPrompt = () => {
 
   useEffect(() => {
     checkAndPrompt();
+    
+    // Failsafe: Clear loading after 5 seconds no matter what
+    const timeout = setTimeout(() => {
+      if (attemptingAuto) {
+        console.warn('Auto-subscribe timeout, clearing loading state');
+        setAttemptingAuto(false);
+      }
+    }, 5000);
+    
+    return () => clearTimeout(timeout);
   }, []);
 
   const checkAndPrompt = async () => {
     // Check if push is supported
     if (!('serviceWorker' in navigator && 'PushManager' in window)) {
+      setAttemptingAuto(false);
       return;
     }
 
@@ -37,7 +48,6 @@ const AutoPushPrompt = () => {
       if (permission === 'granted') {
         // Permission already granted, auto-subscribe immediately
         await autoSubscribe();
-        setAttemptingAuto(false);
       } else if (permission === 'default') {
         // Never asked, show mandatory prompt IMMEDIATELY
         setAttemptingAuto(false);
@@ -51,6 +61,9 @@ const AutoPushPrompt = () => {
       setAttemptingAuto(false);
     }
   };
+      setAttemptingAuto(false);
+    }
+  };
 
   const autoSubscribe = async () => {
     try {
@@ -58,6 +71,8 @@ const AutoPushPrompt = () => {
       const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
       
       if (!vapidPublicKey) {
+        console.error('VAPID public key not configured');
+        setAttemptingAuto(false);
         return;
       }
 
@@ -77,8 +92,12 @@ const AutoPushPrompt = () => {
 
       await api.post('/push-subscriptions/', subscriptionData);
       console.log('✅ Auto-subscribed to push notifications');
+      setAttemptingAuto(false);
     } catch (error) {
       console.error('Auto-subscribe failed:', error);
+      setAttemptingAuto(false);
+      // Show prompt if auto-subscribe fails
+      setShow(true);
     }
   };
 
